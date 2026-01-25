@@ -274,9 +274,9 @@ button:disabled{background:#aaa;}
 <!-- monun-->
 <div class="card">
   <div class="title">🤫 Moun (Chup Rahna)</div>
-  <div class="time">(20 minute)</div>
+  <div class="time">(60 minute)</div>
 
-  <div id="mounTimer">⏳ 20:00</div>
+  <div id="mounTimer">⏳ 60:00</div>
   <button onclick="startMoun()">▶️ Start</button>
   <button onclick="doneMoun()" disabled id="mounDone">✔ Kiya</button>
   <button class="red"
@@ -519,13 +519,13 @@ function startMoun(){
     if (mounTime <= 0){
       clearInterval(mounInt);
       mounDone.disabled = false;
-      mounMsg.innerText = "✅ 20 min moun complete";
+      mounMsg.innerText = "✅ 60 min moun complete";
     }
   },1000);
 }
 
 function doneMoun(){
-  saveTaskForMonth("Moun (Chup Rahna)", "done", "20 min", 3);
+  saveTaskForMonth("Moun (Chup Rahna)", "done", "60 min", 3);
   mounMsg.innerText = "🤫 Moun complete (+3 coins)";
   mounDone.disabled = true;
 
