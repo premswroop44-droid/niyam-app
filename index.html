@@ -292,6 +292,14 @@ button:disabled{background:#aaa;}
   
 
 <script>
+  function loadCoins(){
+  let savedCoins = localStorage.getItem("coins");
+  coins = savedCoins ? parseInt(savedCoins) : 0;
+}
+function saveCoins(){
+  localStorage.setItem("coins", coins);
+}
+
 /* =================================================
    GLOBAL STATE
 ================================================= */
@@ -316,9 +324,11 @@ const rupeesSpan = document.getElementById("rupees");
    WALLET
 ================================================= */
 function updateWallet(){
-  coinsSpan.innerText = coins;
-  rupeesSpan.innerText = coins / 2;
+  document.getElementById("coins").innerText = coins;
+  document.getElementById("rupees").innerText = coins / 2;
+  saveCoins(); // 🔑 MOST IMPORTANT LINE
 }
+
 
 /* =================================================
    TIME HELPERS
@@ -787,6 +797,9 @@ if ("serviceWorker" in navigator) {
       });
   });
 }
+loadCoins();
+updateWallet();
+
 </script>
 
 </body>
