@@ -511,18 +511,28 @@ let mounTime = 3600; // 1 hour
 
 function startMoun(){
   if (mounInt) return;
+
+  resetMounTimer(); // 🔥 IMPORTANT
+
   mounInt = setInterval(()=>{
     mounTime--;
+
+    let min = Math.floor(mounTime / 60);
+    let sec = mounTime % 60;
+
     document.getElementById("mounTimer").innerText =
-      "⏳ " + formatTime(mounTime);
+      `⏳ ${min}:${sec < 10 ? "0"+sec : sec}`;
 
     if (mounTime <= 0){
       clearInterval(mounInt);
+      mounInt = null;
       mounDone.disabled = false;
-      mounMsg.innerText = "✅ 60 min moun complete";
+      mounMsg.innerText = "✅ Moun complete (1 hour)";
     }
   },1000);
 }
+resetMounTimer();
+
 
 function doneMoun(){
   saveTaskForMonth("Moun (Chup Rahna)", "done", "60 min", 3);
