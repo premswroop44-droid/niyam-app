@@ -273,19 +273,21 @@ button:disabled{background:#aaa;}
 </div>
 <!-- monun-->
 <div class="card">
-  <div class="title">🤫 Moun (Chup Rahna)</div>
-  <div class="time">(60 minute)</div>
+  <h3>🤫 Moun (Chup Rahna)</h3>
 
   <div id="mounTimer">⏳ 60:00</div>
-  <button onclick="startMoun()">▶️ Start</button>
-  <button onclick="doneMoun()" disabled id="mounDone">✔ Kiya</button>
-  <button class="red"
-    onclick="skipTask('mounMsg',null)">
-    ❌ Nahi Kiya
+
+  <button id="mounStart" onclick="startMoun()">
+    ▶ Start Moun
   </button>
 
-  <div class="msg" id="mounMsg"></div>
+  <button id="mounDone" onclick="doneMoun()" disabled>
+    ✔ Moun Complete
+  </button>
+
+  <div id="mounMsg"></div>
 </div>
+
 
 
 <!-- 🏫 SCHOOL -->
@@ -508,29 +510,37 @@ function doneMala(){
    🤫 MOUN TIMER (20 MIN)
 =============================== */
 let mounTime = 3600; // 1 hour
-
+let mounInt = null;
 function startMoun(){
+  console.log("Moun started"); // debug
+
   if (mounInt) return;
 
-  resetMounTimer(); // 🔥 IMPORTANT
+  mounTime = 3600; // reset to 1 hour
 
-  mounInt = setInterval(()=>{
+  mounInt = setInterval(() => {
     mounTime--;
 
     let min = Math.floor(mounTime / 60);
     let sec = mounTime % 60;
 
-    document.getElementById("mounTimer").innerText =
-      `⏳ ${min}:${sec < 10 ? "0"+sec : sec}`;
+    const timerEl = document.getElementById("mounTimer");
+    if (timerEl){
+      timerEl.innerText =
+        `⏳ ${min}:${sec < 10 ? "0"+sec : sec}`;
+    }
 
     if (mounTime <= 0){
       clearInterval(mounInt);
       mounInt = null;
-      mounDone.disabled = false;
-      mounMsg.innerText = "✅ Moun complete (1 hour)";
+
+      document.getElementById("mounDone").disabled = false;
+      document.getElementById("mounMsg").innerText =
+        "✅ Moun complete (1 hour)";
     }
-  },1000);
+  }, 1000);
 }
+
 resetMounTimer();
 
 
