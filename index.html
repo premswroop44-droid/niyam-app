@@ -302,9 +302,6 @@ let coins = 0;
 let isSunday = false;
 let childName = "Chetna";
 
-// Test mode
-let TEST_MODE = false;
-
 // Pending tasks for end-of-day review
 let pendingTasks = [];
 
@@ -341,21 +338,6 @@ function currentHour(){
   return new Date().getHours();
 }
 
-/* =================================================
-   TEST MODE
-================================================= */
-function toggleTestMode(){
-  TEST_MODE = !TEST_MODE;
-  document.getElementById("testStatus").innerText =
-    "Test Mode: " + (TEST_MODE ? "ON" : "OFF");
-  resetExerciseTimer();
-
-  alert(
-    TEST_MODE
-      ? "🧪 Test Mode ON (time ignore)"
-      : "✅ Test Mode OFF (real timing active)"
-  );
-}
 
 /* =================================================
    SUNDAY TOGGLE
@@ -386,10 +368,11 @@ function addPending(taskName, taskCoins, msgId){
 ================================================= */
 function doneWakeUp(){
   const h = currentHour();
-  if (!TEST_MODE && (h < 4 || h >= 5)){
-    alert("❌ Uthna sirf 4:00–5:00 AM ke beech valid hai");
-    return;
-  }
+  if (h < 4 || h >= 5){
+  alert("❌ Subah uthna sirf 4:00–5:00 AM ke beech valid hai");
+  return;
+}
+
   addPending("Subah Jaldi Uthna", 5, "wakeMsg");
 }
 
@@ -400,7 +383,7 @@ let exInt = null;
 let exTime = 0;
 
 function resetExerciseTimer(){
-  exTime = TEST_MODE ? 10 : 1800;
+exTime = 1800; // 30 minutes
   exTimer.innerText = "⏳ " + formatTime(exTime);
 }
 
@@ -643,11 +626,23 @@ function showReviewPopup(){
 
 function approveCurrent(){
   let task = pendingTasks[reviewIndex];
+
+  // coins add
   coins += task.coins;
   updateWallet();
+
+  // 🔥 MONTH DATA SAVE (IMPORTANT)
+  saveTaskForMonth(
+    task.name,
+    "done",
+    task.time,
+    task.coins
+  );
+
   reviewIndex++;
   showReviewPopup();
 }
+
 
 function rejectCurrent(){
   let penalty = 2;
@@ -665,6 +660,18 @@ function rejectCurrent(){
 
 function closeReviewPopup(){
   document.getElementById("reviewOverlay").style.display = "none";
+  if (reviewIndex >= pendingTasks.length){
+  closeReviewPopup();
+  pendingTasks = [];
+
+  // 🔥 ADD THESE 2 LINES
+  renderMonthlyCalendar();
+  updateMonthSummary();
+
+  alert("✅ Daily review complete");
+  return;
+}
+
 }
 
 function skipTask(msgId, nextBtnId){
@@ -794,6 +801,8 @@ if ("serviceWorker" in navigator) {
 }
 loadCoins();
 updateWallet();
+renderMonthlyCalendar();
+updateMonthSummary();
 
 </script>
 
