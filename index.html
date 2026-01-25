@@ -471,7 +471,7 @@ function doneExercise(){
 ================================================= */
 function doneBath(){
   const h = currentHour();
-  if (!TEST_MODE && h >= 6){
+  if ( h >= 6){
     alert("❌ Nahana 6:00 AM se pehle hona chahiye");
     return;
   }
@@ -496,7 +496,7 @@ function donePran(){
 
 function doneMala(){
   const h = currentHour();
-  if (!TEST_MODE && h >= 7){
+  if ( h >= 7){
     alert("❌ Mala jap 7:00 AM se pehle hona chahiye");
     return;
   }
@@ -538,7 +538,7 @@ function doneMoun(){
 
     if (again){
       // Reset timer for another round
-      mounTime = TEST_MODE ? 10 : 1200;
+      mounTime = 3600; // 1 hour
       document.getElementById("mounTimer").innerText =
         "⏳ " + formatTime(mounTime);
 
@@ -568,7 +568,7 @@ function doneSchool(){
 ================================================= */
 function doneHelpMummy(){
   const h = currentHour();
-  if (!TEST_MODE && (h < 17 || h >= 19)){
+  if ( (h < 17 || h >= 19)){
     alert("❌ Mummy ki help sirf 5–7 PM ke beech valid hai");
     return;
   }
