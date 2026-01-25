@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Niyam App</title>
 <link rel="manifest" href="manifest.json">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#4f46e5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -129,6 +129,51 @@ button:disabled{background:#aaa;}
 
 .done{ color:green; }
 .skip{ color:red; }
+/* ===============================
+   MOBILE FIX (PHONE VIEW)
+================================ */
+@media (max-width: 600px){
+
+  body{
+    font-size:14px;
+  }
+
+  .app-container{
+    padding:10px;
+  }
+
+  .main-layout{
+    display:block;   /* desktop grid hat jaayega */
+  }
+
+  .controls,
+  .reports{
+    width:100%;
+  }
+
+  .card{
+    margin-bottom:12px;
+  }
+
+  button{
+    width:100%;      /* buttons full-width */
+    font-size:15px;
+  }
+
+  .wallet{
+    font-size:16px;
+  }
+
+  #calendar{
+    grid-template-columns: repeat(7, 1fr);
+    gap:4px;
+  }
+
+  .day{
+    font-size:10px;
+    min-height:70px;
+  }
+}
 
 
 </style>
@@ -169,7 +214,7 @@ button:disabled{background:#aaa;}
 <!-- 🌅 SUBAH JALDI UTHNA -->
 <div class="card">
 <div class="title">🌅 Subah Jaldi Uthna</div>
-<div class="time">(Allowed: 4:00 – 7:00 AM)</div>
+<div class="time">(Allowed: 4:00 – 5:00 AM)</div>
 <button onclick="doneWakeUp()">✔ Tick</button>
 <div class="msg" id="wakeMsg"></div>
 <button class="red" onclick="skipTask('wakeMsg','exStartBtn')">❌ Nahi Kiya</button>
@@ -207,6 +252,7 @@ button:disabled{background:#aaa;}
 <!-- 🧘 PRANAYAMA -->
 <div class="card">
 <div class="title">🧘 Pranayama</div>
+<div class="time">(Allowed:before 5:00 AM)</div>
 <button id="pranBtn" onclick="donePran()" disabled>✔ Tick</button>
 <div class="msg" id="pranMsg"></div>
 <button class="red"
@@ -439,8 +485,8 @@ function doneBath(){
 ================================================= */
 function donePran(){
   const h = currentHour();
-  if (!TEST_MODE && h >= 7){
-    alert("❌ Pranayama 7:00 AM se pehle hona chahiye");
+ if (h >= 5){
+    alert("❌ Pranayama 5:00 AM se pehle hona chahiye");
     return;
   }
   addPending("Pranayama", 3, "pranMsg");
@@ -461,8 +507,7 @@ function doneMala(){
 /* ===============================
    🤫 MOUN TIMER (20 MIN)
 =============================== */
-let mounTime = TEST_MODE ? 10 : 1200;
-let mounInt = null;
+let mounTime = 3600; // 1 hour
 
 function startMoun(){
   if (mounInt) return;
