@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<title>Niyam App</title>
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#4f46e5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Niyam App">
+
+
+<style>
+body{
+  margin:0;
+  font-family:Segoe UI, sans-serif;
+  background:#eef2f7;
+  display:flex;
+  justify-content:center;
+}
+.app{
+  max-width:390px;
+  width:100%;
+  padding:20px;
+  text-align:center;
+}
+.wallet{
+  background:#fff;
+  padding:12px;
+  border-radius:12px;
+  font-weight:600;
+  box-shadow:0 4px 10px rgba(0,0,0,.1);
+  margin-bottom:15px;
+}
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:15px;
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+.title{font-size:18px;font-weight:600;}
+.time{font-size:14px;color:#666;margin:6px 0;}
+button{
+  width:100%;
+  padding:11px;
+  border:none;
+  border-radius:10px;
+  background:#4f46e5;
+  color:#fff;
+  margin-top:8px;
+  cursor:pointer;
+}
+button.red{background:#ef4444;}
+button.green{background:#16a34a;}
+button:disabled{background:#aaa;}
+.msg{margin-top:8px;font-weight:600;}
+.toggle{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-bottom:15px;
+}
+#reviewOverlay{
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.6);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+
+#reviewBox{
+  background:#fff;
+  width:300px;
+  padding:20px;
+  border-radius:14px;
+  text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
+
+.reviewBtns{
+  display:flex;
+  gap:10px;
+  margin-top:20px;
+}
+
+.reviewBtns button{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  font-size:15px;
+  cursor:pointer;
+}
+
+.reviewBtns .yes{
+  background:#16a34a;
+  color:white;
+}
+
+.reviewBtns .no{
+  background:#dc2626;
+  color:white;
+}
+#calendar{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:5px;
+  margin-top:10px;
+}
+
+.day{
+  border:1px solid #ddd;
+  border-radius:6px;
+  padding:5px;
+  font-size:11px;
+  background:#f9fafb;
+}
+
+.day strong{
+  display:block;
+  font-size:12px;
+  margin-bottom:3px;
+}
+
+.done{ color:green; }
+.skip{ color:red; }
+
+
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<h2>📱 Niyam App</h2>
+
+<div class="wallet">
+🪙 Coins: <span id="coins">0</span> | ₹ <span id="rupees">0</span>
+</div>
+<button onclick="showMonthlyData()">📊 Mahine ka Data</button>
+
+
+<!-- 🔐 Parent Review Button -->
+
+<div class="card">
+  <div class="title">🧪 Developer / Test Mode</div>
+  <button onclick="toggleTestMode()">Toggle Test Mode</button>
+  <div class="time" id="testStatus">Test Mode: OFF</div>
+</div>
+<div class="card">
+  <div class="title">👨‍👩‍👦 Parent Section</div>
+
+  <button onclick="parentReview()">🔐 Parent Daily Review</button>
+
+  <button onclick="changeParentPin()">
+    🔁 Change Parent PIN
+  </button>
+
+  <div class="time">(Sirf parent ke liye)</div>
+</div>
+
+
+<!-- ☀️ SUNDAY TOGGLE -->
+<div class="toggle">
+<button class="green" onclick="setSunday(true)">☀️ Sunday</button>
+<button onclick="setSunday(false)">🏫 Normal Day</button>
+</div>
+
+<!-- 🌅 SUBAH JALDI UTHNA -->
+<div class="card">
+<div class="title">🌅 Subah Jaldi Uthna</div>
+<div class="time">(Allowed: 4:00 – 7:00 AM)</div>
+<button onclick="doneWakeUp()">✔ Tick</button>
+<div class="msg" id="wakeMsg"></div>
+<button class="red" onclick="skipTask('wakeMsg','exStartBtn')">❌ Nahi Kiya</button>
+
+</div>
+
+<!-- 🏃 EXERCISE -->
+<div class="card">
+<div class="title">🏃 Exercise</div>
+<div class="time">(30 minute compulsory)</div>
+
+<div id="exTimer">⏳ 30:00</div>
+<button onclick="startExercise()">▶️ Start</button>
+<button class="red" onclick="stopExercise()">⏸️ Stop</button>
+<button id="exTick" onclick="doneExercise()" disabled>✔ Tick</button>
+<div class="msg" id="exMsg"></div>
+<button class="red"
+  onclick="skipTask('exMsg','bathBtn')">
+❌ Nahi Kiya
+</button>
+</button>
+</div>
+
+<!-- 🚿 NAHANA -->
+<div class="card">
+<div class="title">🚿 Nahana</div>
+<button id="bathBtn" onclick="doneBath()" disabled>✔ Tick</button>
+<div class="msg" id="bathMsg"></div>
+<button class="red"
+  onclick="skipTask('bathMsg','pranBtn')">
+❌ Nahi Kiya
+</button>
+</div>
+
+<!-- 🧘 PRANAYAMA -->
+<div class="card">
+<div class="title">🧘 Pranayama</div>
+<button id="pranBtn" onclick="donePran()" disabled>✔ Tick</button>
+<div class="msg" id="pranMsg"></div>
+<button class="red"
+  onclick="skipTask('pranMsg','malaBtn')">
+❌ Nahi Kiya
+</button>
+</div>
+
+<!-- 📿 MALA -->
+<div class="card">
+<div class="title">📿 11 Mala Jap</div>
+<button id="malaBtn" onclick="doneMala()" disabled>✔ Tick</button>
+<div class="msg" id="malaMsg"></div>
+<button class="red"
+  onclick="skipTask('malaMsg','schoolBtn')">
+❌ Nahi Kiya
+</button>
+</div>
+<!-- monun-->
+<div class="card">
+  <div class="title">🤫 Moun (Chup Rahna)</div>
+  <div class="time">(20 minute)</div>
+
+  <div id="mounTimer">⏳ 20:00</div>
+  <button onclick="startMoun()">▶️ Start</button>
+  <button onclick="doneMoun()" disabled id="mounDone">✔ Kiya</button>
+  <button class="red"
+    onclick="skipTask('mounMsg',null)">
+    ❌ Nahi Kiya
+  </button>
+
+  <div class="msg" id="mounMsg"></div>
+</div>
+
+
+<!-- 🏫 SCHOOL -->
+<div class="card">
+<div class="title">🏫 School Jana</div>
+<button id="schoolBtn" onclick="doneSchool()" disabled>✔ Tick</button>
+<div class="msg" id="schoolMsg"></div>
+<button class="red"
+  onclick="skipTask('schoolMsg',null)">
+❌ Nahi Kiya
+</button>
+</div>
+
+<div class="card">
+  <div class="title">🌆 Mummy ki kaam me help</div>
+  <div class="time">(5:00 – 7:00 PM)</div>
+  <button onclick="doneHelpMummy()">✔ Tick</button>
+  <div class="msg" id="helpMsg"></div>
+</div>
+
+
+</div>
+<!-- 🔐 Parent Review Popup -->
+<div id="reviewOverlay" style="display:none;">
+  <div id="reviewBox">
+    <h3>👨‍👩‍👦 Parent Review</h3>
+    <p id="reviewText"></p>
+
+    <div class="reviewBtns">
+      <button class="yes" onclick="approveCurrent()">✅ Haan</button>
+      <button class="no" onclick="rejectCurrent()">❌ Nahi</button>
+    </div>
+  </div>
+</div>
+<!-- 📅 Monthly Report -->
+<div class="card">
+  <div class="title">📊 Monthly Report</div>
+  <div id="calendar"></div>
+</div>
+<div class="card">
+  <div class="title">🧾 Month Summary</div>
+  <div class="time">
+    🪙 Total Coins: <strong id="monthCoins">0</strong><br>
+    💰 Rupees: ₹ <strong id="monthRupees">0</strong>
+  
+
+<script>
+/* =================================================
+   GLOBAL STATE
+================================================= */
+let coins = 0;
+let isSunday = false;
+let childName = "Chetna";
+
+// Test mode
+let TEST_MODE = false;
+
+// Pending tasks for end-of-day review
+let pendingTasks = [];
+
+// Review popup index
+let reviewIndex = 0;
+
+// Wallet elements
+const coinsSpan = document.getElementById("coins");
+const rupeesSpan = document.getElementById("rupees");
+
+/* =================================================
+   WALLET
+================================================= */
+function updateWallet(){
+  coinsSpan.innerText = coins;
+  rupeesSpan.innerText = coins / 2;
+}
+
+/* =================================================
+   TIME HELPERS
+================================================= */
+function nowTime(){
+  const d = new Date();
+  let h = d.getHours();
+  let m = d.getMinutes();
+  let ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return `${h}:${m < 10 ? "0"+m : m} ${ampm}`;
+}
+
+function currentHour(){
+  return new Date().getHours();
+}
+
+/* =================================================
+   TEST MODE
+================================================= */
+function toggleTestMode(){
+  TEST_MODE = !TEST_MODE;
+  document.getElementById("testStatus").innerText =
+    "Test Mode: " + (TEST_MODE ? "ON" : "OFF");
+  resetExerciseTimer();
+
+  alert(
+    TEST_MODE
+      ? "🧪 Test Mode ON (time ignore)"
+      : "✅ Test Mode OFF (real timing active)"
+  );
+}
+
+/* =================================================
+   SUNDAY TOGGLE
+================================================= */
+function setSunday(val){
+  isSunday = val;
+  schoolMsg.innerText = val
+    ? "☀️ Sunday – School ke coins nahi milenge"
+    : "";
+}
+
+/* =================================================
+   ADD PENDING TASK
+================================================= */
+function addPending(taskName, taskCoins, msgId){
+  pendingTasks.push({
+    name: taskName,
+    coins: taskCoins,
+    time: nowTime()
+  });
+
+  document.getElementById(msgId).innerText =
+    "⏳ Pending (Done at " + nowTime() + ")";
+}
+
+/* =================================================
+   🌅 SUBAH JALDI UTHNA (4–5 AM)
+================================================= */
+function doneWakeUp(){
+  const h = currentHour();
+  if (!TEST_MODE && (h < 4 || h >= 5)){
+    alert("❌ Uthna sirf 4:00–5:00 AM ke beech valid hai");
+    return;
+  }
+  addPending("Subah Jaldi Uthna", 5, "wakeMsg");
+}
+
+/* =================================================
+   🏃 EXERCISE (30 MIN)
+================================================= */
+let exInt = null;
+let exTime = 0;
+
+function resetExerciseTimer(){
+  exTime = TEST_MODE ? 10 : 1800;
+  exTimer.innerText = "⏳ " + formatTime(exTime);
+}
+
+function formatTime(t){
+  let m = Math.floor(t/60);
+  let s = t % 60;
+  return m + ":" + (s < 10 ? "0"+s : s);
+}
+
+resetExerciseTimer();
+
+function startExercise(){
+  if (exInt) return;
+
+  exInt = setInterval(()=>{
+    exTime--;
+    exTimer.innerText = "⏳ " + formatTime(exTime);
+    if (exTime <= 0){
+      clearInterval(exInt);
+      exInt = null;
+      exTick.disabled = false;
+    }
+  },1000);
+}
+
+function stopExercise(){
+  clearInterval(exInt);
+  exInt = null;
+}
+
+function doneExercise(){
+  addPending("Exercise (30 min)", 3, "exMsg");
+  exTick.disabled = true;
+  bathBtn.disabled = false;
+}
+
+/* =================================================
+   🚿 NAHANA (6 AM TAK)
+================================================= */
+function doneBath(){
+  const h = currentHour();
+  if (!TEST_MODE && h >= 6){
+    alert("❌ Nahana 6:00 AM se pehle hona chahiye");
+    return;
+  }
+  addPending("Nahana", 2, "bathMsg");
+  bathBtn.disabled = true;
+  pranBtn.disabled = false;
+}
+
+/* =================================================
+   🧘 PRANAYAMA + 📿 MALA (7 AM TAK)
+================================================= */
+function donePran(){
+  const h = currentHour();
+  if (!TEST_MODE && h >= 7){
+    alert("❌ Pranayama 7:00 AM se pehle hona chahiye");
+    return;
+  }
+  addPending("Pranayama", 3, "pranMsg");
+  pranBtn.disabled = true;
+  malaBtn.disabled = false;
+}
+
+function doneMala(){
+  const h = currentHour();
+  if (!TEST_MODE && h >= 7){
+    alert("❌ Mala jap 7:00 AM se pehle hona chahiye");
+    return;
+  }
+  addPending("11 Mala Jap", 4, "malaMsg");
+  malaBtn.disabled = true;
+  schoolBtn.disabled = false;
+}
+/* ===============================
+   🤫 MOUN TIMER (20 MIN)
+=============================== */
+let mounTime = TEST_MODE ? 10 : 1200;
+let mounInt = null;
+
+function startMoun(){
+  if (mounInt) return;
+  mounInt = setInterval(()=>{
+    mounTime--;
+    document.getElementById("mounTimer").innerText =
+      "⏳ " + formatTime(mounTime);
+
+    if (mounTime <= 0){
+      clearInterval(mounInt);
+      mounDone.disabled = false;
+      mounMsg.innerText = "✅ 20 min moun complete";
+    }
+  },1000);
+}
+
+function doneMoun(){
+  saveTaskForMonth("Moun (Chup Rahna)", "done", "20 min", 3);
+  mounMsg.innerText = "🤫 Moun complete (+3 coins)";
+  mounDone.disabled = true;
+
+  // 🔔 Repeat popup
+  setTimeout(()=>{
+    let again = confirm(
+      "🤫 Moun complete ho gaya.\n" +
+      "Kya aap dubara Moun karna chahte hain?"
+    );
+
+    if (again){
+      // Reset timer for another round
+      mounTime = TEST_MODE ? 10 : 1200;
+      document.getElementById("mounTimer").innerText =
+        "⏳ " + formatTime(mounTime);
+
+      mounDone.disabled = true;
+      startMoun();
+    }
+  },500);
+}
+
+
+/* =================================================
+   🏫 SCHOOL
+================================================= */
+function doneSchool(){
+  if (isSunday){
+    schoolMsg.innerText =
+      "☀️ Sunday – Done at " + nowTime() + " (0 coin)";
+    schoolBtn.disabled = true;
+    return;
+  }
+  addPending("School Jana", 2, "schoolMsg");
+  schoolBtn.disabled = true;
+}
+
+/* =================================================
+   🌆 EVENING: MUMMY KI HELP (5–7 PM)
+================================================= */
+function doneHelpMummy(){
+  const h = currentHour();
+  if (!TEST_MODE && (h < 17 || h >= 19)){
+    alert("❌ Mummy ki help sirf 5–7 PM ke beech valid hai");
+    return;
+  }
+  addPending("Mummy ki kaam me help", 5, "helpMsg");
+}
+
+/* =================================================
+   🔐 PARENT REVIEW (PIN)
+================================================= */
+function parentReview(){
+  let savedPin = localStorage.getItem("parentPin");
+
+  if (!savedPin){
+    let newPin = prompt("Set Parent PIN (4 digit):");
+    if (!newPin || newPin.length !== 4 || isNaN(newPin)){
+      alert("❌ PIN 4 digit number hona chahiye");
+      return;
+    }
+    localStorage.setItem("parentPin", newPin);
+    alert("✅ Parent PIN set. Ab dobara button dabao.");
+    return;
+  }
+
+  let pin = prompt("Enter Parent PIN:");
+  if (pin !== savedPin){
+    alert("❌ Wrong PIN");
+    return;
+  }
+
+  startDailyReview();
+}
+/* =================================================
+   🔐 CHANGE PARENT PIN
+================================================= */
+function changeParentPin(){
+  let savedPin = localStorage.getItem("parentPin");
+
+  // Agar PIN abhi set hi nahi hai
+  if (!savedPin){
+    alert("❌ Pehle Parent PIN set karo (Parent Review se)");
+    return;
+  }
+
+  // Old PIN verify
+  let oldPin = prompt("Enter OLD Parent PIN:");
+  if (oldPin !== savedPin){
+    alert("❌ Galat old PIN");
+    return;
+  }
+
+  // New PIN input
+  let newPin = prompt("Enter NEW 4-digit PIN:");
+  if (!newPin || newPin.length !== 4 || isNaN(newPin)){
+    alert("❌ New PIN sirf 4 digit number hona chahiye");
+    return;
+  }
+
+  // Confirm new PIN
+  let confirmPin = prompt("Confirm NEW PIN:");
+  if (newPin !== confirmPin){
+    alert("❌ PIN match nahi hua");
+    return;
+  }
+
+  // Save new PIN
+  localStorage.setItem("parentPin", newPin);
+  alert("✅ Parent PIN successfully change ho gaya");
+}
+
+
+/* =================================================
+   📋 CUSTOM POPUP REVIEW
+================================================= */
+function startDailyReview(){
+  if (pendingTasks.length === 0){
+    alert("✅ Aaj koi pending task nahi");
+    return;
+  }
+  reviewIndex = 0;
+  showReviewPopup();
+}
+
+function showReviewPopup(){
+  if (reviewIndex >= pendingTasks.length){
+    closeReviewPopup();
+    pendingTasks = [];
+    updateWallet();
+    alert("✅ Daily review complete");
+    return;
+  }
+
+  let task = pendingTasks[reviewIndex];
+  document.getElementById("reviewText").innerText =
+    `${childName} ne ye kaam kiya?\n\n` +
+    `📌 ${task.name}\n` +
+    `⏱️ Time: ${task.time}`;
+
+  document.getElementById("reviewOverlay").style.display = "flex";
+}
+
+function approveCurrent(){
+  let task = pendingTasks[reviewIndex];
+  coins += task.coins;
+  updateWallet();
+  reviewIndex++;
+  showReviewPopup();
+}
+
+function rejectCurrent(){
+  let penalty = 2;
+  coins = Math.max(0, coins - penalty);
+  updateWallet();
+
+  alert(
+    `${childName}, aapne jhooth bola.\n` +
+    `${penalty} coins minus ho gaye.`
+  );
+
+  reviewIndex++;
+  showReviewPopup();
+}
+
+function closeReviewPopup(){
+  document.getElementById("reviewOverlay").style.display = "none";
+}
+
+function skipTask(msgId, nextBtnId){
+  document.getElementById(msgId).innerText =
+    "❌ Nahi kiya (0 coins)";
+
+  // Next task unlock
+  if (nextBtnId){
+    document.getElementById(nextBtnId).disabled = false;
+  }
+}
+// jab daily review complete ho
+updateMonthSummary();
+renderMonthlyCalendar();
+
+/* ===============================
+   MONTHLY DATA STORAGE
+=============================== */
+function todayKey(){
+  return new Date().toISOString().split("T")[0];
+}
+
+function saveTaskForMonth(taskName, status, info, coinsValue){
+  let data = JSON.parse(localStorage.getItem("monthData")) || {};
+  let day = todayKey();
+
+  if (!data[day]) data[day] = [];
+
+  data[day].push({
+    task: taskName,
+    status: status,   // done / skip
+    info: info || "",
+    coins: coinsValue || 0,
+    savedAt: nowTime()
+  });
+
+  localStorage.setItem("monthData", JSON.stringify(data));
+}
+
+function showMonthlyData(){
+  let data = JSON.parse(localStorage.getItem("monthData")) || {};
+  let text = "📅 Monthly Report\n\n";
+
+  for (let day in data){
+    text += day + ":\n";
+    data[day].forEach(t=>{
+      text += `• ${t.task} → ${t.status}\n`;
+    });
+    text += "\n";
+  }
+
+  alert(text || "No data");
+}
+function renderMonthlyCalendar(){
+  const cal = document.getElementById("calendar");
+  cal.innerHTML = "";
+
+  const data = JSON.parse(localStorage.getItem("monthData")) || {};
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  for(let d = 1; d <= daysInMonth; d++){
+    let dateKey =
+      year + "-" +
+      String(month+1).padStart(2,"0") + "-" +
+      String(d).padStart(2,"0");
+
+    let dayBox = document.createElement("div");
+    dayBox.className = "day";
+    dayBox.innerHTML = `<strong>${d}</strong>`;
+
+    if(data[dateKey]){
+      data[dateKey].forEach(t=>{
+        let span = document.createElement("div");
+        span.className = t.status === "done" ? "done" : "skip";
+        span.innerText = t.task;
+        dayBox.appendChild(span);
+      });
+    }
+
+    cal.appendChild(dayBox);
+  }
+}
+renderMonthlyCalendar();
+function calculateMonthlyCoins(){
+  let data = JSON.parse(localStorage.getItem("monthData")) || {};
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // current month
+
+  let totalCoins = 0;
+
+  for (let day in data){
+    let d = new Date(day);
+    if (d.getFullYear() === year && d.getMonth() === month){
+      data[day].forEach(t=>{
+        totalCoins += t.coins || 0;
+      });
+    }
+  }
+
+  return totalCoins;
+}
+function updateMonthSummary(){
+  let total = calculateMonthlyCoins();
+  document.getElementById("monthCoins").innerText = total;
+  document.getElementById("monthRupees").innerText = total / 2;
+}
+updateMonthSummary();
+</script>
+<!-- 🔧 PWA: Service Worker Register -->
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("service-worker.js")
+      .then(() => {
+        console.log("✅ Service Worker Registered");
+      })
+      .catch((err) => {
+        console.log("❌ SW Error", err);
+      });
+  });
+}
+</script>
+
+</body>
+</html>

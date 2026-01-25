@@ -1,0 +1,23 @@
+{
+  "name": "Niyam App",
+  "short_name": "Niyam",
+  "description": "Daily habits & discipline app for kids",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f3f6fb",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+"icons": [
+  {
+    "src": "./icon-192.png",
+    "sizes": "any",
+    "type": "image/png"
+  },
+  {
+    "src": "icon-512.png",
+    "sizes": "any",
+    "type": "image/png"
+  }
+]
+}
+
