@@ -352,6 +352,61 @@ body {
   color: white;
   font-weight: bold;
 }
+/* ========= MOBILE MODE (≤ 400px) ========= */
+@media (max-width: 400px){
+
+  /* poora layout ek column */
+  .main-layout,
+  .dashboard,
+  .container,
+  .row {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  /* side panels hide */
+  .right-panel,
+  .monthly-panel,
+  .storage-panel {
+    display: none !important;
+  }
+
+  /* cards full width */
+  .card {
+    width: 100% !important;
+    margin: 10px 0 !important;
+  }
+
+  /* buttons mobile friendly */
+  button {
+    width: 100% !important;
+    font-size: 16px;
+  }
+
+  /* header center */
+  header,
+  .header {
+    text-align: center;
+  }
+
+}
+.btn-mobile {
+  display: none;
+  margin: 10px 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: #4facfe;
+  color: white;
+  font-size: 16px;
+  border: none;
+}
+
+/* mobile me hi dikhe */
+@media (max-width: 400px){
+  .btn-mobile {
+    display: block;
+  }
+}
 
 
 </style>
@@ -372,12 +427,10 @@ body {
   </div>
 
 </div>
+<button class="btn-mobile" onclick="openMobileData()">
+  📊 Month & Data
+</button>
 
-  <div id="nameScreen" class="card">
-  <h3>👤 Aapka Naam</h3>
-  <input id="userNameInput" placeholder="Naam likhiye">
-  <button onclick="saveUserName()">Start</button>
-  </div>
 
 <h2 id="welcomeUser" style="display:none"></h2>
 
@@ -388,9 +441,6 @@ body {
 <div id="scoreBox" class="card">
   ⭐ Score: 0
 </div>
-
-<button onclick="showMonthlyData()">📊 Mahine ka Data</button>
-
 
 <!-- 🔐 Parent Review Button -->
 
@@ -501,13 +551,6 @@ body {
   onclick="skipTask('schoolMsg',null)">
 ❌ Nahi Kiya
 </button>
-</div>
-
-<div class="card">
-  <div class="title">🌆 Mummy ki kaam me help</div>
-  <div class="time">(5:00 – 7:00 PM)</div>
-  <button onclick="doneHelpMummy()">✔ Tick</button>
-  <div class="msg" id="helpMsg"></div>
 </div>
 
 
@@ -673,7 +716,7 @@ function rejectTask(){
   users[currentUser].score = Math.max(0, users[currentUser].score - 2);
   saveUsers(users);
   updateScoreUI();
-  alert("❌ Jhoot bola – 2 score minus");
+  alert("❌ apne Jhoot bola – 2 score minus");
   reviewIndex++;
   showReviewTask();
 }
