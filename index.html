@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>Niyam App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
 <link rel="manifest" href="manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#4f46e5">
@@ -174,19 +176,141 @@ button:disabled{background:#aaa;}
     min-height:70px;
   }
 }
+/* ===== MOBILE FIX ===== */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;   /* 👈 sabse important */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+}
+/* ===== PHONE VIEW ===== */
+@media (max-width: 768px){
+
+  .main-layout,
+  .container,
+  .dashboard {
+    display: block !important;  /* ek ke niche ek */
+    width: 100%;
+  }
+
+  .card {
+    width: 100%;
+    margin: 10px 0;
+    box-sizing: border-box;
+  }
+
+  button {
+    width: 100%;
+    font-size: 16px;
+  }
+
+  img, svg, i {
+    max-width: 100%;
+    height: auto;
+  }
+
+}
+/* ===== FINAL MOBILE + DESKTOP FIX ===== */
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;   /* 🔥 horizontal scroll kill */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+}
+
+#app-root {
+  width: 100%;
+  max-width: 100vw;     /* 🔥 important */
+  padding: 10px;
+}
+
+/* Main layout */
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Cards */
+.card {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Monthly report calendar */
+#calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  width: 100%;
+}
+
+#calendar button,
+#calendar div {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Buttons */
+button {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* ===== PHONE VIEW ===== */
+@media (max-width: 768px){
+
+  .main-layout {
+    grid-template-columns: 1fr;  /* 🔥 ek ke niche ek */
+  }
+
+  #calendar {
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+}
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  touch-action: manipulation;
+}
+@media screen and (max-width: 1000px) {
+  * {
+    max-width: 100% !important;
+  }
+}
 
 
 </style>
 </head>
 
 <body>
+  <div id="nameScreen" class="card">
+  <h3>👤 Aapka Naam</h3>
+  <input id="userNameInput" placeholder="Naam likhiye">
+  <button onclick="saveUserName()">Start</button>
+  </div>
+
+<h2 id="welcomeUser" style="display:none"></h2>
+
 <div class="app">
 
 <h2>📱 Niyam App</h2>
 
-<div class="wallet">
-🪙 Coins: <span id="coins">0</span> | ₹ <span id="rupees">0</span>
+<div id="scoreBox" class="card">
+  ⭐ Score: 0
 </div>
+
 <button onclick="showMonthlyData()">📊 Mahine ka Data</button>
 
 
@@ -333,543 +457,188 @@ button:disabled{background:#aaa;}
     🪙 Total Coins: <strong id="monthCoins">0</strong><br>
     💰 Rupees: ₹ <strong id="monthRupees">0</strong>
   
-
 <script>
-  function loadCoins(){
-  let savedCoins = localStorage.getItem("coins");
-  coins = savedCoins ? parseInt(savedCoins) : 0;
-}
-function saveCoins(){
-  localStorage.setItem("coins", coins);
-}
+/*************************************************
+ * NIYAM APP – FINAL CLEAN JS (SALE READY)
+ * Multi User + Score + Parent Review + Leaderboard
+ *************************************************/
 
-/* =================================================
-   GLOBAL STATE
-================================================= */
-let coins = 0;
-let isSunday = false;
-let childName = "Chetna";
-
-// Pending tasks for end-of-day review
+let currentUser = null;
 let pendingTasks = [];
-
-// Review popup index
 let reviewIndex = 0;
 
-// Wallet elements
-const coinsSpan = document.getElementById("coins");
-const rupeesSpan = document.getElementById("rupees");
+/* ---------- STORAGE HELPERS ---------- */
 
-/* =================================================
-   WALLET
-================================================= */
-function updateWallet(){
-  document.getElementById("coins").innerText = coins;
-  document.getElementById("rupees").innerText = coins / 2;
-  saveCoins(); // 🔑 MOST IMPORTANT LINE
+function getUsers(){
+  return JSON.parse(localStorage.getItem("users")) || {};
 }
 
+function saveUsers(users){
+  localStorage.setItem("users", JSON.stringify(users));
+}
 
-/* =================================================
-   TIME HELPERS
-================================================= */
+/* ---------- USER SETUP ---------- */
+
+function saveUserName(){
+  const name = document.getElementById("userNameInput").value.trim();
+  if(!name){
+    alert("Naam likhiye");
+    return;
+  }
+
+  currentUser = name;
+  localStorage.setItem("activeUser", name);
+
+  let users = getUsers();
+  if(!users[name]){
+    users[name] = { score: 0 };
+    saveUsers(users);
+  }
+
+  document.getElementById("nameScreen").style.display = "none";
+  document.getElementById("welcomeUser").innerText =
+    "👋 Namaste, " + name;
+
+  updateScoreUI();
+  updateLeaderboard();
+}
+
+function loadUser(){
+  const saved = localStorage.getItem("activeUser");
+  if(!saved) return;
+
+  currentUser = saved;
+  document.getElementById("nameScreen").style.display = "none";
+  document.getElementById("welcomeUser").innerText =
+    "👋 Namaste, " + saved;
+
+  updateScoreUI();
+  updateLeaderboard();
+}
+
+/* ---------- SCORE SYSTEM (ONLY ONE) ---------- */
+
+function getScore(){
+  let users = getUsers();
+  return users[currentUser]?.score || 0;
+}
+
+function addScore(points){
+  let users = getUsers();
+  if(!users[currentUser]){
+    users[currentUser] = { score: 0 };
+  }
+  users[currentUser].score += points;
+  saveUsers(users);
+  updateScoreUI();
+}
+
+function updateScoreUI(){
+  document.getElementById("scoreBox").innerText =
+    "⭐ Score: " + getScore();
+}
+
+/* ---------- TASK + PENDING ---------- */
+
 function nowTime(){
-  const d = new Date();
-  let h = d.getHours();
-  let m = d.getMinutes();
-  let ampm = h >= 12 ? "PM" : "AM";
-  h = h % 12 || 12;
-  return `${h}:${m < 10 ? "0"+m : m} ${ampm}`;
+  return new Date().toLocaleTimeString();
 }
 
-function currentHour(){
-  return new Date().getHours();
-}
-
-
-/* =================================================
-   SUNDAY TOGGLE
-================================================= */
-function setSunday(val){
-  isSunday = val;
-  schoolMsg.innerText = val
-    ? "☀️ Sunday – School ke coins nahi milenge"
-    : "";
-}
-
-/* =================================================
-   ADD PENDING TASK
-================================================= */
-function addPending(taskName, taskCoins, msgId){
+function addPending(taskName, points){
   pendingTasks.push({
     name: taskName,
-    coins: taskCoins,
+    points: points,
     time: nowTime()
   });
-
-  document.getElementById(msgId).innerText =
-    "⏳ Pending (Done at " + nowTime() + ")";
+  alert("🕒 Task parent review ke liye pending hai");
 }
 
-/* =================================================
-   🌅 SUBAH JALDI UTHNA (4–5 AM)
-================================================= */
+/* ---------- TASK FUNCTIONS ---------- */
+
 function doneWakeUp(){
-  const h = currentHour();
-  if (h < 4 || h >= 5){
-  alert("❌ Subah uthna sirf 4:00–5:00 AM ke beech valid hai");
-  return;
-}
-
-  addPending("Subah Jaldi Uthna", 5, "wakeMsg");
-}
-
-/* =================================================
-   🏃 EXERCISE (30 MIN)
-================================================= */
-let exInt = null;
-let exTime = 0;
-
-function resetExerciseTimer(){
-exTime = 1800; // 30 minutes
-  exTimer.innerText = "⏳ " + formatTime(exTime);
-}
-
-function formatTime(t){
-  let m = Math.floor(t/60);
-  let s = t % 60;
-  return m + ":" + (s < 10 ? "0"+s : s);
-}
-
-resetExerciseTimer();
-
-function startExercise(){
-  if (exInt) return;
-
-  exInt = setInterval(()=>{
-    exTime--;
-    exTimer.innerText = "⏳ " + formatTime(exTime);
-    if (exTime <= 0){
-      clearInterval(exInt);
-      exInt = null;
-      exTick.disabled = false;
-    }
-  },1000);
-}
-
-function stopExercise(){
-  clearInterval(exInt);
-  exInt = null;
+  addPending("Subah Jaldi Uthna", 5);
 }
 
 function doneExercise(){
-  addPending("Exercise (30 min)", 3, "exMsg");
-  exTick.disabled = true;
-  bathBtn.disabled = false;
+  addPending("Exercise", 3);
 }
 
-/* =================================================
-   🚿 NAHANA (6 AM TAK)
-================================================= */
 function doneBath(){
-  const h = currentHour();
-  if ( h >= 6){
-    alert("❌ Nahana 6:00 AM se pehle hona chahiye");
-    return;
-  }
-  addPending("Nahana", 2, "bathMsg");
-  bathBtn.disabled = true;
-  pranBtn.disabled = false;
+  addPending("Nahana", 2);
 }
 
-/* =================================================
-   🧘 PRANAYAMA + 📿 MALA (7 AM TAK)
-================================================= */
-function donePran(){
-  const h = currentHour();
- if (h >= 5){
-    alert("❌ Pranayama 5:00 AM se pehle hona chahiye");
-    return;
-  }
-  addPending("Pranayama", 3, "pranMsg");
-  pranBtn.disabled = true;
-  malaBtn.disabled = false;
+function donePranayam(){
+  addPending("Pranayam", 4);
 }
 
 function doneMala(){
-  const h = currentHour();
-  if ( h >= 7){
-    alert("❌ Mala jap 7:00 AM se pehle hona chahiye");
-    return;
-  }
-  addPending("11 Mala Jap", 4, "malaMsg");
-  malaBtn.disabled = true;
-  schoolBtn.disabled = false;
+  addPending("11 Mala Jap", 5);
 }
-/* ===============================
-   🤫 MOUN TIMER (20 MIN)
-=============================== */
-let mounInt = null;
-let mounTime = 3600; // 1 hour
-function startMoun(){
-  console.log("Moun started"); // debug
-
-  if (mounInt) return;
-
-  mounTime = 3600; // reset to 1 hour
-
-  mounInt = setInterval(() => {
-    mounTime--;
-
-    let min = Math.floor(mounTime / 60);
-    let sec = mounTime % 60;
-
-    const timerEl = document.getElementById("mounTimer");
-    if (timerEl){
-      timerEl.innerText =
-        `⏳ ${min}:${sec < 10 ? "0"+sec : sec}`;
-    }
-
-    if (mounTime <= 0){
-      clearInterval(mounInt);
-      mounInt = null;
-
-      document.getElementById("mounDone").disabled = false;
-      document.getElementById("mounMsg").innerText =
-        "✅ Moun complete (1 hour)";
-    }
-  }, 1000);
-}
-
-resetMounTimer();
-
 
 function doneMoun(){
-  saveTaskForMonth("Moun (Chup Rahna)", "done", "60 min", 3);
-  mounMsg.innerText = "🤫 Moun complete (+3 coins)";
-  mounDone.disabled = true;
-
-  // 🔔 Repeat popup
-  setTimeout(()=>{
-    let again = confirm(
-      "🤫 Moun complete ho gaya.\n" +
-      "Kya aap dubara Moun karna chahte hain?"
-    );
-
-    if (again){
-      // Reset timer for another round
-      mounTime = 3600; // 1 hour
-      document.getElementById("mounTimer").innerText =
-        "⏳ " + formatTime(mounTime);
-
-      mounDone.disabled = true;
-      startMoun();
-    }
-  },500);
+  addPending("Moun (Chup Rahna)", 3);
 }
 
+/* ---------- PARENT REVIEW ---------- */
 
-/* =================================================
-   🏫 SCHOOL
-================================================= */
-function doneSchool(){
-  if (isSunday){
-    schoolMsg.innerText =
-      "☀️ Sunday – Done at " + nowTime() + " (0 coin)";
-    schoolBtn.disabled = true;
-    return;
-  }
-  addPending("School Jana", 2, "schoolMsg");
-  schoolBtn.disabled = true;
-}
-
-/* =================================================
-   🌆 EVENING: MUMMY KI HELP (5–7 PM)
-================================================= */
-function doneHelpMummy(){
-  const h = currentHour();
-  if ( (h < 17 || h >= 19)){
-    alert("❌ Mummy ki help sirf 5–7 PM ke beech valid hai");
-    return;
-  }
-  addPending("Mummy ki kaam me help", 5, "helpMsg");
-}
-
-/* =================================================
-   🔐 PARENT REVIEW (PIN)
-================================================= */
-function parentReview(){
-  let savedPin = localStorage.getItem("parentPin");
-
-  if (!savedPin){
-    let newPin = prompt("Set Parent PIN (4 digit):");
-    if (!newPin || newPin.length !== 4 || isNaN(newPin)){
-      alert("❌ PIN 4 digit number hona chahiye");
-      return;
-    }
-    localStorage.setItem("parentPin", newPin);
-    alert("✅ Parent PIN set. Ab dobara button dabao.");
-    return;
-  }
-
-  let pin = prompt("Enter Parent PIN:");
-  if (pin !== savedPin){
-    alert("❌ Wrong PIN");
-    return;
-  }
-
-  startDailyReview();
-}
-/* =================================================
-   🔐 CHANGE PARENT PIN
-================================================= */
-function changeParentPin(){
-  let savedPin = localStorage.getItem("parentPin");
-
-  // Agar PIN abhi set hi nahi hai
-  if (!savedPin){
-    alert("❌ Pehle Parent PIN set karo (Parent Review se)");
-    return;
-  }
-
-  // Old PIN verify
-  let oldPin = prompt("Enter OLD Parent PIN:");
-  if (oldPin !== savedPin){
-    alert("❌ Galat old PIN");
-    return;
-  }
-
-  // New PIN input
-  let newPin = prompt("Enter NEW 4-digit PIN:");
-  if (!newPin || newPin.length !== 4 || isNaN(newPin)){
-    alert("❌ New PIN sirf 4 digit number hona chahiye");
-    return;
-  }
-
-  // Confirm new PIN
-  let confirmPin = prompt("Confirm NEW PIN:");
-  if (newPin !== confirmPin){
-    alert("❌ PIN match nahi hua");
-    return;
-  }
-
-  // Save new PIN
-  localStorage.setItem("parentPin", newPin);
-  alert("✅ Parent PIN successfully change ho gaya");
-}
-
-
-/* =================================================
-   📋 CUSTOM POPUP REVIEW
-================================================= */
-function startDailyReview(){
-  if (pendingTasks.length === 0){
-    alert("✅ Aaj koi pending task nahi");
+function openParentReview(){
+  if(pendingTasks.length === 0){
+    alert("Koi pending task nahi hai");
     return;
   }
   reviewIndex = 0;
-  showReviewPopup();
+  document.getElementById("parentPopup").style.display = "block";
+  showReviewTask();
 }
 
-function showReviewPopup(){
-  if (reviewIndex >= pendingTasks.length){
-    closeReviewPopup();
+function showReviewTask(){
+  if(reviewIndex >= pendingTasks.length){
     pendingTasks = [];
-    updateWallet();
-    alert("✅ Daily review complete");
+    document.getElementById("parentPopup").style.display = "none";
+    updateLeaderboard();
+    alert("✅ Parent review complete");
     return;
   }
 
-  let task = pendingTasks[reviewIndex];
-  document.getElementById("reviewText").innerText =
-    `${childName} ne ye kaam kiya?\n\n` +
-    `📌 ${task.name}\n` +
-    `⏱️ Time: ${task.time}`;
-
-  document.getElementById("reviewOverlay").style.display = "flex";
+  document.getElementById("parentTaskName").innerText =
+    pendingTasks[reviewIndex].name +
+    " (" + pendingTasks[reviewIndex].time + ")";
 }
 
-function approveCurrent(){
-  let task = pendingTasks[reviewIndex];
-
-  // coins add
-  coins += task.coins;
-  updateWallet();
-
-  // 🔥 MONTH DATA SAVE (IMPORTANT)
-  saveTaskForMonth(
-    task.name,
-    "done",
-    task.time,
-    task.coins
-  );
-
+function approveTask(){
+  addScore(pendingTasks[reviewIndex].points);
   reviewIndex++;
-  showReviewPopup();
+  showReviewTask();
 }
 
-
-function rejectCurrent(){
-  let penalty = 2;
-  coins = Math.max(0, coins - penalty);
-  updateWallet();
-
-  alert(
-    `${childName}, aapne jhooth bola.\n` +
-    `${penalty} coins minus ho gaye.`
-  );
-
+function rejectTask(){
+  let users = getUsers();
+  users[currentUser].score = Math.max(0, users[currentUser].score - 2);
+  saveUsers(users);
+  alert("❌ Jhoot bola – 2 score minus");
+  updateScoreUI();
   reviewIndex++;
-  showReviewPopup();
+  showReviewTask();
 }
 
-function closeReviewPopup(){
-  document.getElementById("reviewOverlay").style.display = "none";
-  if (reviewIndex >= pendingTasks.length){
-  closeReviewPopup();
-  pendingTasks = [];
+/* ---------- LEADERBOARD ---------- */
 
-  // 🔥 ADD THESE 2 LINES
-  renderMonthlyCalendar();
-  updateMonthSummary();
+function updateLeaderboard(){
+  let users = getUsers();
+  let arr = Object.entries(users)
+    .sort((a,b)=>b[1].score - a[1].score);
 
-  alert("✅ Daily review complete");
-  return;
-}
-
-}
-
-function skipTask(msgId, nextBtnId){
-  document.getElementById(msgId).innerText =
-    "❌ Nahi kiya (0 coins)";
-
-  // Next task unlock
-  if (nextBtnId){
-    document.getElementById(nextBtnId).disabled = false;
-  }
-}
-// jab daily review complete ho
-updateMonthSummary();
-renderMonthlyCalendar();
-
-/* ===============================
-   MONTHLY DATA STORAGE
-=============================== */
-function todayKey(){
-  return new Date().toISOString().split("T")[0];
-}
-
-function saveTaskForMonth(taskName, status, info, coinsValue){
-  let data = JSON.parse(localStorage.getItem("monthData")) || {};
-  let day = todayKey();
-
-  if (!data[day]) data[day] = [];
-
-  data[day].push({
-    task: taskName,
-    status: status,   // done / skip
-    info: info || "",
-    coins: coinsValue || 0,
-    savedAt: nowTime()
+  let html = "";
+  arr.forEach((u,i)=>{
+    html += `<li>${i+1}. ${u[0]} — ⭐ ${u[1].score}</li>`;
   });
 
-  localStorage.setItem("monthData", JSON.stringify(data));
+  document.getElementById("leaderboard").innerHTML = html;
 }
 
-function showMonthlyData(){
-  let data = JSON.parse(localStorage.getItem("monthData")) || {};
-  let text = "📅 Monthly Report\n\n";
+/* ---------- INIT ---------- */
 
-  for (let day in data){
-    text += day + ":\n";
-    data[day].forEach(t=>{
-      text += `• ${t.task} → ${t.status}\n`;
-    });
-    text += "\n";
-  }
-
-  alert(text || "No data");
-}
-function renderMonthlyCalendar(){
-  const cal = document.getElementById("calendar");
-  cal.innerHTML = "";
-
-  const data = JSON.parse(localStorage.getItem("monthData")) || {};
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  for(let d = 1; d <= daysInMonth; d++){
-    let dateKey =
-      year + "-" +
-      String(month+1).padStart(2,"0") + "-" +
-      String(d).padStart(2,"0");
-
-    let dayBox = document.createElement("div");
-    dayBox.className = "day";
-    dayBox.innerHTML = `<strong>${d}</strong>`;
-
-    if(data[dateKey]){
-      data[dateKey].forEach(t=>{
-        let span = document.createElement("div");
-        span.className = t.status === "done" ? "done" : "skip";
-        span.innerText = t.task;
-        dayBox.appendChild(span);
-      });
-    }
-
-    cal.appendChild(dayBox);
-  }
-}
-renderMonthlyCalendar();
-function calculateMonthlyCoins(){
-  let data = JSON.parse(localStorage.getItem("monthData")) || {};
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth(); // current month
-
-  let totalCoins = 0;
-
-  for (let day in data){
-    let d = new Date(day);
-    if (d.getFullYear() === year && d.getMonth() === month){
-      data[day].forEach(t=>{
-        totalCoins += t.coins || 0;
-      });
-    }
-  }
-
-  return totalCoins;
-}
-function updateMonthSummary(){
-  let total = calculateMonthlyCoins();
-  document.getElementById("monthCoins").innerText = total;
-  document.getElementById("monthRupees").innerText = total / 2;
-}
-updateMonthSummary();
+window.onload = loadUser;
 </script>
-<!-- 🔧 PWA: Service Worker Register -->
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("service-worker.js")
-      .then(() => {
-        console.log("✅ Service Worker Registered");
-      })
-      .catch((err) => {
-        console.log("❌ SW Error", err);
-      });
-  });
-}
-loadCoins();
-updateWallet();
-renderMonthlyCalendar();
-updateMonthSummary();
-
-</script>
-
 </body>
 </html>
