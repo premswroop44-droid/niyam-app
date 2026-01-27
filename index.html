@@ -289,12 +289,90 @@ body {
     max-width: 100% !important;
   }
 }
+/* ===== ENTRY POPUP (FULL PAGE FEEL) ===== */
+
+.entry-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.entry-popup {
+  background: #ffffff;
+  width: 100%;
+  max-width: 420px;
+  height: 90vh;              /* 🔥 height badi */
+  border-radius: 18px;
+  padding: 25px;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.entry-popup h2 {
+  margin-bottom: 8px;
+}
+
+.entry-popup p {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 25px;
+}
+
+.entry-popup input {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 16px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+}
+
+.entry-popup input:focus {
+  outline: none;
+  border-color: #4facfe;
+}
+
+.entry-popup button {
+  margin-top: 10px;
+  padding: 14px;
+  font-size: 17px;
+  border-radius: 14px;
+  border: none;
+  background: #4facfe;
+  color: white;
+  font-weight: bold;
+}
 
 
 </style>
 </head>
 
 <body>
+  <div id="entryPopup" class="entry-overlay">
+
+  <div class="entry-popup">
+    <h2>👋 Welcome</h2>
+    <p>Apni basic details bhare</p>
+
+    <input id="userNameInput" type="text" placeholder="Full Name">
+    <input id="userAgeInput" type="number" placeholder="Age">
+    <input id="userPhoneInput" type="tel" placeholder="Phone Number">
+
+    <button onclick="saveUserName()">Continue</button>
+  </div>
+
+</div>
+
   <div id="nameScreen" class="card">
   <h3>👤 Aapka Naam</h3>
   <input id="userNameInput" placeholder="Naam likhiye">
@@ -458,132 +536,112 @@ body {
     💰 Rupees: ₹ <strong id="monthRupees">0</strong>
   
 <script>
-/*************************************************
- * NIYAM APP – FINAL CLEAN JS (SALE READY)
- * Multi User + Score + Parent Review + Leaderboard
+  /*************************************************
+ * NIYAM APP – FULL FINAL JS
  *************************************************/
 
+/* ========== CONFIG ========== */
+const DEFAULT_PARENT_PIN = "1234";
+
+/* ========== GLOBALS ========== */
 let currentUser = null;
 let pendingTasks = [];
 let reviewIndex = 0;
 
-/* ---------- STORAGE HELPERS ---------- */
-
+/* ========== STORAGE HELPERS ========== */
 function getUsers(){
   return JSON.parse(localStorage.getItem("users")) || {};
 }
-
 function saveUsers(users){
-  localStorage.setItem("users", JSON.stringify(users));
+  document.getElementById("entryPopup").style.display = "none";
+
+}
+function getParentPin(){
+  return localStorage.getItem("parentPin") || DEFAULT_PARENT_PIN;
+}
+function setParentPin(pin){
+  localStorage.setItem("parentPin", pin);
 }
 
-/* ---------- USER SETUP ---------- */
-
+/* ========== USER SETUP ========== */
 function saveUserName(){
   const name = document.getElementById("userNameInput").value.trim();
-  if(!name){
-    alert("Naam likhiye");
-    return;
-  }
+  if(!name){ alert("Naam likhiye"); return; }
 
   currentUser = name;
   localStorage.setItem("activeUser", name);
 
   let users = getUsers();
-  if(!users[name]){
-    users[name] = { score: 0 };
-    saveUsers(users);
-  }
+  if(!users[name]) users[name] = { score: 0 };
+  saveUsers(users);
 
   document.getElementById("nameScreen").style.display = "none";
-  document.getElementById("welcomeUser").innerText =
-    "👋 Namaste, " + name;
+  document.getElementById("welcomeUser").innerText = "👋 Namaste, " + name;
 
   updateScoreUI();
   updateLeaderboard();
 }
 
 function loadUser(){
-  const saved = localStorage.getItem("activeUser");
+  document.getElementById("entryPopup").style.display = "flex";
   if(!saved) return;
 
   currentUser = saved;
   document.getElementById("nameScreen").style.display = "none";
-  document.getElementById("welcomeUser").innerText =
-    "👋 Namaste, " + saved;
+  document.getElementById("welcomeUser").innerText = "👋 Namaste, " + saved;
 
   updateScoreUI();
   updateLeaderboard();
 }
+if(saved){
+  document.getElementById("entryPopup").style.display = "none";
+}
 
-/* ---------- SCORE SYSTEM (ONLY ONE) ---------- */
-
+/* ========== SCORE SYSTEM (ONE SOURCE) ========== */
 function getScore(){
   let users = getUsers();
   return users[currentUser]?.score || 0;
 }
-
 function addScore(points){
   let users = getUsers();
-  if(!users[currentUser]){
-    users[currentUser] = { score: 0 };
-  }
+  if(!users[currentUser]) users[currentUser] = { score: 0 };
   users[currentUser].score += points;
   saveUsers(users);
   updateScoreUI();
 }
-
 function updateScoreUI(){
   document.getElementById("scoreBox").innerText =
     "⭐ Score: " + getScore();
 }
 
-/* ---------- TASK + PENDING ---------- */
-
+/* ========== TIME HELPER ========== */
 function nowTime(){
   return new Date().toLocaleTimeString();
 }
 
+/* ========== PENDING TASKS ========== */
 function addPending(taskName, points){
-  pendingTasks.push({
-    name: taskName,
-    points: points,
-    time: nowTime()
-  });
+  pendingTasks.push({ name: taskName, points, time: nowTime() });
   alert("🕒 Task parent review ke liye pending hai");
 }
 
-/* ---------- TASK FUNCTIONS ---------- */
+/* ========== TASK FUNCTIONS ========== */
+function doneWakeUp(){ addPending("Subah Jaldi Uthna", 5); }
+function doneExercise(){ addPending("Exercise", 3); }
+function doneBath(){ addPending("Nahana", 2); }
+function donePranayam(){ addPending("Pranayam", 4); }
+function doneMala(){ addPending("11 Mala Jap", 5); }
+function doneMoun(){ addPending("Moun (Chup Rahna)", 3); } // no repeat popup
 
-function doneWakeUp(){
-  addPending("Subah Jaldi Uthna", 5);
-}
-
-function doneExercise(){
-  addPending("Exercise", 3);
-}
-
-function doneBath(){
-  addPending("Nahana", 2);
-}
-
-function donePranayam(){
-  addPending("Pranayam", 4);
-}
-
-function doneMala(){
-  addPending("11 Mala Jap", 5);
-}
-
-function doneMoun(){
-  addPending("Moun (Chup Rahna)", 3);
-}
-
-/* ---------- PARENT REVIEW ---------- */
-
+/* ========== PARENT PIN / REVIEW ========== */
 function openParentReview(){
   if(pendingTasks.length === 0){
     alert("Koi pending task nahi hai");
+    return;
+  }
+  const pin = prompt("🔐 Parent PIN dalo");
+  if(pin !== getParentPin()){
+    alert("❌ Galat PIN – Access denied");
     return;
   }
   reviewIndex = 0;
@@ -599,10 +657,9 @@ function showReviewTask(){
     alert("✅ Parent review complete");
     return;
   }
-
+  const t = pendingTasks[reviewIndex];
   document.getElementById("parentTaskName").innerText =
-    pendingTasks[reviewIndex].name +
-    " (" + pendingTasks[reviewIndex].time + ")";
+    t.name + " (" + t.time + ")";
 }
 
 function approveTask(){
@@ -615,14 +672,29 @@ function rejectTask(){
   let users = getUsers();
   users[currentUser].score = Math.max(0, users[currentUser].score - 2);
   saveUsers(users);
-  alert("❌ Jhoot bola – 2 score minus");
   updateScoreUI();
+  alert("❌ Jhoot bola – 2 score minus");
   reviewIndex++;
   showReviewTask();
 }
 
-/* ---------- LEADERBOARD ---------- */
+/* ========== CHANGE PARENT PIN ========== */
+function changeParentPin(){
+  const oldPin = prompt("Purana Parent PIN dalo");
+  if(oldPin !== getParentPin()){
+    alert("❌ Galat PIN");
+    return;
+  }
+  const newPin = prompt("Naya Parent PIN dalo (min 4 digit)");
+  if(!newPin || newPin.length < 4){
+    alert("PIN kam se kam 4 digit ka hona chahiye");
+    return;
+  }
+  setParentPin(newPin);
+  alert("✅ Parent PIN change ho gaya");
+}
 
+/* ========== LEADERBOARD ========== */
 function updateLeaderboard(){
   let users = getUsers();
   let arr = Object.entries(users)
@@ -632,12 +704,10 @@ function updateLeaderboard(){
   arr.forEach((u,i)=>{
     html += `<li>${i+1}. ${u[0]} — ⭐ ${u[1].score}</li>`;
   });
-
   document.getElementById("leaderboard").innerHTML = html;
 }
 
-/* ---------- INIT ---------- */
-
+/* ========== INIT ========== */
 window.onload = loadUser;
 </script>
 </body>
