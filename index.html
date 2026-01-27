@@ -407,6 +407,31 @@ body {
     display: block;
   }
 }
+/* ========= FORCE MOBILE HIDE (≤ 400px) ========= */
+@media (max-width: 400px){
+
+  /* Monthly Report + Month Summary panels */
+  #monthlyReport,
+  #monthSummary,
+  .monthly-report,
+  .month-summary {
+    display: none !important;
+  }
+
+}
+@media (max-width: 400px){
+
+  button {
+    width: auto !important;     /* 🔥 full width band */
+    min-width: 160px;
+    padding: 10px 16px;
+    font-size: 14px;
+    border-radius: 10px;
+    display: block;
+    margin: 8px auto;           /* center */
+  }
+
+}
 
 
 </style>
@@ -691,6 +716,29 @@ function openParentReview(){
   document.getElementById("parentPopup").style.display = "block";
   showReviewTask();
 }
+function openParentReview(){
+  if(pendingTasks.length === 0){
+    alert("Koi pending task nahi hai");
+    return;
+  }
+
+  const pin = prompt("🔐 Parent PIN dalo");
+  if(pin !== getParentPin()){
+    alert("❌ Galat PIN");
+    return;
+  }
+
+  const popup = document.getElementById("parentPopup");
+  if(!popup){
+    alert("❌ Parent popup HTML missing");
+    return;
+  }
+
+  reviewIndex = 0;
+  popup.style.display = "flex";
+  showReviewTask();
+}
+
 
 function showReviewTask(){
   if(reviewIndex >= pendingTasks.length){
