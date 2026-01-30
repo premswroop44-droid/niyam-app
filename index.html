@@ -432,6 +432,30 @@ body {
   }
 
 }
+/* ===== MOBILE HARD FIX ===== */
+@media (max-width: 400px){
+
+  body {
+    overflow-x: hidden;
+  }
+
+  /* FORCE remove monthly & summary */
+  #monthlyReport,
+  #monthSummary,
+  .monthly-report,
+  .month-summary {
+    display: none !important;
+    width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Layout collapse to single column */
+  .main-layout {
+    display: block !important;
+    width: 100% !important;
+  }
+}
 
 
 </style>
@@ -450,6 +474,8 @@ body {
 
     <button onclick="saveUserName()">Continue</button>
   </div>
+  <div id="entryPopup" class="entry-overlay" style="display:none">
+
 
 </div>
 <button class="btn-mobile" onclick="openMobileData()">
@@ -548,6 +574,19 @@ body {
 ❌ Nahi Kiya
 </button>
 </div>
+
+<!-- 📿 MALA -->
+<div class="card">
+<div class="title">satsang sunna</div>
+<button onclick="doneSatsang()" disabled>✔ Tick</button>
+<div class="msg" id="malaMsg"></div>
+<button class="red"
+  onclick="skipTask('doneSatsang','schoolBtn')">
+❌ Nahi Kiya
+</button>
+</div>
+
+
 <!-- monun-->
 <div class="card">
   <h3>🤫 Moun (Chup Rahna)</h3>
@@ -566,17 +605,6 @@ body {
 </div>
 
 
-
-<!-- 🏫 SCHOOL -->
-<div class="card">
-<div class="title">🏫 School Jana</div>
-<button id="schoolBtn" onclick="doneSchool()" disabled>✔ Tick</button>
-<div class="msg" id="schoolMsg"></div>
-<button class="red"
-  onclick="skipTask('schoolMsg',null)">
-❌ Nahi Kiya
-</button>
-</div>
 
 
 </div>
@@ -651,16 +679,20 @@ function saveUserName(){
 }
 
 function loadUser(){
-  document.getElementById("entryPopup").style.display = "flex";
-  if(!saved) return;
+  const saved = localStorage.getItem("activeUser");
 
-  currentUser = saved;
-  document.getElementById("nameScreen").style.display = "none";
-  document.getElementById("welcomeUser").innerText = "👋 Namaste, " + saved;
-
-  updateScoreUI();
-  updateLeaderboard();
+  if(saved){
+    currentUser = saved;
+    document.getElementById("welcomeUser").innerText =
+      "👋 Namaste, " + saved;
+    hideEntryPopup();
+    updateScoreUI();
+    updateLeaderboard();
+  } else {
+    document.getElementById("entryPopup").style.display = "flex";
+  }
 }
+
 if(saved){
   document.getElementById("entryPopup").style.display = "none";
 }
@@ -700,22 +732,13 @@ function doneBath(){ addPending("Nahana", 2); }
 function donePranayam(){ addPending("Pranayam", 4); }
 function doneMala(){ addPending("11 Mala Jap", 5); }
 function doneMoun(){ addPending("Moun (Chup Rahna)", 3); } // no repeat popup
+function doneSatsang(){
+  addPending("Satsang Sunna", 4);
+}
+
 
 /* ========== PARENT PIN / REVIEW ========== */
-function openParentReview(){
-  if(pendingTasks.length === 0){
-    alert("Koi pending task nahi hai");
-    return;
-  }
-  const pin = prompt("🔐 Parent PIN dalo");
-  if(pin !== getParentPin()){
-    alert("❌ Galat PIN – Access denied");
-    return;
-  }
-  reviewIndex = 0;
-  document.getElementById("parentPopup").style.display = "block";
-  showReviewTask();
-}
+
 function openParentReview(){
   if(pendingTasks.length === 0){
     alert("Koi pending task nahi hai");
@@ -736,6 +759,28 @@ function openParentReview(){
 
   reviewIndex = 0;
   popup.style.display = "flex";
+  showReviewTask();
+}
+function openParentReview(){
+  if(pendingTasks.length === 0){
+    alert("Koi pending task nahi");
+    return;
+  }
+
+  const pin = prompt("🔐 Parent PIN dalo");
+  if(pin !== getParentPin()){
+    alert("❌ Galat PIN");
+    return;
+  }
+
+  reviewIndex = 0;
+  const p = document.getElementById("parentPopup");
+  if(!p){
+    alert("Parent popup missing");
+    return;
+  }
+
+  p.style.display = "flex";
   showReviewTask();
 }
 
@@ -768,6 +813,8 @@ function rejectTask(){
   reviewIndex++;
   showReviewTask();
 }
+document.getElementById("parentPopup").style.display = "none";
+
 
 /* ========== CHANGE PARENT PIN ========== */
 function changeParentPin(){
