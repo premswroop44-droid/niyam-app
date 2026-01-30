@@ -493,6 +493,55 @@ html, body {
   overflow-x: hidden;
   overflow-y: auto;
 }
+/* ===== POPUP OVERLAY ===== */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.45);
+  display: none;              /* 🔥 by default hidden */
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* popup card */
+.popup-card {
+  width: 90%;
+  max-width: 400px;
+  height: 90vh;               /* page feel */
+  background: white;
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* inputs */
+.popup-card input {
+  margin-bottom: 14px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+/* button */
+.popup-card button {
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: #4facfe;
+  color: #fff;
+}
+
+/* SCROLL FIX */
+html, body {
+  overflow-y: auto !important;
+}
 
 
 </style>
@@ -512,12 +561,6 @@ html, body {
     <button onclick="saveUserName()">Continue</button>
   </div>
   <div id="entryPopup" class="entry-overlay" style="display:none">
-
-
-</div>
-<button class="btn-mobile" onclick="openMobileData()">
-  📊 Month & Data
-</button>
 
 
 <h2 id="welcomeUser" style="display:none"></h2>
@@ -703,6 +746,7 @@ function saveUserName(){
 
   document.getElementById("nameScreen").style.display = "none";
   document.getElementById("welcomeUser").innerText = "👋 Namaste, " + name;
+document.getElementById("entryPopup").style.display = "none";
 
   updateScoreUI();
   updateLeaderboard();
@@ -715,7 +759,9 @@ function loadUser(){
     currentUser = saved;
     document.getElementById("welcomeUser").innerText =
       "👋 Namaste, " + saved;
-    hideEntryPopup();
+
+    document.getElementById("entryPopup").style.display = "none";
+
     updateScoreUI();
     updateLeaderboard();
   } else {
@@ -893,6 +939,23 @@ function updateLeaderboard(){
   });
 
   lb.innerHTML = html;
+}
+function updateLeaderboard(){
+  const lb = document.getElementById("leaderboard");
+  if(!lb) return;
+
+  let users = JSON.parse(localStorage.getItem("users")) || {};
+  let list = Object.entries(users)
+    .sort((a,b)=>b[1].score - a[1].score);
+
+  if(list.length === 0){
+    lb.innerHTML = "<li>No data yet</li>";
+    return;
+  }
+
+  lb.innerHTML = list
+    .map((u,i)=>`${i+1}. ${u[0]} — ⭐ ${u[1].score}`)
+    .join("<br>");
 }
 
 
