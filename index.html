@@ -548,23 +548,7 @@ html, body {
 </head>
 
 <body>
- <div id="entryPopup" class="popup-overlay" style="display:flex">
-  <div class="popup-card">
-    <h2>👋 Welcome</h2>
-    <p>Apni basic details bhare</p>
 
-    <input id="userNameInput" placeholder="Full Name">
-    <input id="userAgeInput" placeholder="Age">
-    <input id="userPhoneInput" placeholder="Phone Number">
-
-    <button onclick="saveUserName()">Continue</button>
-  </div>
-</div>
-
-  <div id="entryPopup" class="entry-overlay" style="display:none">
-
-
-<h2 id="welcomeUser" style="display:none"></h2>
 
 <div class="app">
 
@@ -703,7 +687,25 @@ html, body {
     </div>
   </div>
 </div>
+ <div id="entryPopup" class="popup-overlay" style="display:flex">
+  <div class="popup-card">
+    <h2>👋 Welcome</h2>
+    <p>Apni basic details bhare</p>
 
+    <input id="userNameInput" placeholder="Full Name">
+    <input id="userAgeInput" placeholder="Age">
+    <input id="userPhoneInput" placeholder="Phone Number">
+
+    <button onclick="saveUserName()">Continue</button>
+  </div>
+</div>
+
+  <div id="entryPopup" class="entry-overlay" style="display:none">
+
+
+<h2 id="welcomeUser" style="display:none"></h2>
+</div>
+</div>
   
 <script>
   /*************************************************
@@ -767,27 +769,38 @@ function saveUserName(){
   updateLeaderboard();
 }
 
-
 function loadUser(){
-  const saved = localStorage.getItem("activeUser");
+  try {
+    const active = localStorage.getItem("activeUser");
 
-  if(saved){
-    currentUser = saved;
-    document.getElementById("welcomeUser").innerText =
-      "👋 Namaste, " + saved;
+    const popup = document.getElementById("entryPopup");
+    const app = document.getElementById("app"); // 👈 IMPORTANT
 
-    document.getElementById("entryPopup").style.display = "none";
+    if(active){
+      currentUser = active;
 
-    updateScoreUI();
-    updateLeaderboard();
-  } else {
-    document.getElementById("entryPopup").style.display = "flex";
+      if(popup) popup.style.display = "none";
+      if(app) app.style.display = "block";  // 🔥 THIS WAS MISSING
+
+      const welcome = document.getElementById("welcomeUser");
+      if(welcome){
+        welcome.innerText = "👋 Namaste, " + active;
+      }
+
+      updateScoreUI();
+      updateLeaderboard();
+
+    } else {
+      if(popup) popup.style.display = "flex";
+      if(app) app.style.display = "none";
+    }
+
+  } catch (e){
+    console.error("loadUser crash:", e);
+    alert("App load error – console check karo");
   }
 }
 
-if(saved){
-  document.getElementById("entryPopup").style.display = "none";
-}
 
 /* ========== SCORE SYSTEM (ONE SOURCE) ========== */
 function getScore(){
