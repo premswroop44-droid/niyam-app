@@ -578,6 +578,45 @@ html, body {
   border-radius: 12px;
   font-size: 15px;
 }
+/* ===== PIN REMINDER POPUP ===== */
+#pinReminderPopup{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.pin-reminder-card{
+  background: #fff;
+  width: 90%;
+  max-width: 420px;
+  padding: 22px;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,.3);
+}
+
+.pin-reminder-card h2{
+  margin-bottom: 10px;
+  font-size: 22px;
+}
+
+.pin-reminder-card p{
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.pin-reminder-card button{
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border-radius: 10px;
+  font-size: 15px;
+}
 
 
 </style>
@@ -610,13 +649,6 @@ html, body {
   </button>
 
   <div class="time">(Sirf parent ke liye)</div>
-</div>
-
-
-<!-- ☀️ SUNDAY TOGGLE -->
-<div class="toggle">
-<button class="green" onclick="setSunday(true)">☀️ Sunday</button>
-<button onclick="setSunday(false)">🏫 Normal Day</button>
 </div>
 
 <!-- 🌅 SUBAH JALDI UTHNA -->
@@ -746,7 +778,21 @@ html, body {
 <h2 id="welcomeUser" style="display:none"></h2>
 </div>
 </div>
-  
+  <!-- 🔔 FIRST TIME PARENT PIN REMINDER -->
+<div id="pinReminderPopup" style="display:none;">
+  <div class="pin-reminder-card">
+    <h2>🙏 Yaad Dilana</h2>
+    <p>
+      Kripya <b>Mata ya Pita</b> apna  
+      <b>Parent PIN</b> banaye  
+      taaki bacche ki daily activity  
+      surakshit rahe 🙏
+    </p>
+    <button onclick="openPinSetup()">🔐 PIN Banaye</button>
+    <button onclick="closePinReminder()">Baad me</button>
+  </div>
+</div>
+
 <script>
   /*************************************************
  * NIYAM APP – FULL FINAL JS
@@ -919,7 +965,48 @@ function doneMala(){
   addPending("11 Mala Jap", 5);
 }
 
-function doneMoun(){ addPending("Moun (Chup Rahna)", 3); } // no repeat popup
+let mounSeconds = 60 * 60; // 🔥 1 ghanta = 3600 sec
+let mounInterval = null;
+
+function startMoun(){
+  if(mounInterval) return; // already running
+
+  const timerEl = document.getElementById("mounTimer");
+  if(!timerEl){
+    alert("Moun timer element missing");
+    return;
+  }
+
+  timerEl.innerText = formatTime(mounSeconds);
+
+  mounInterval = setInterval(() => {
+    mounSeconds--;
+
+    timerEl.innerText = formatTime(mounSeconds);
+
+    if(mounSeconds <= 0){
+      clearInterval(mounInterval);
+      mounInterval = null;
+      timerEl.innerText = "✅ Moun Complete";
+
+      // Moun complete → pending for parent review
+      addPending("Moun (1 Hour)", 3);
+      alert("🙏 Moun poora hua");
+    }
+  }, 1000);
+}
+
+function stopMoun(){
+  clearInterval(mounInterval);
+  mounInterval = null;
+}
+
+function formatTime(sec){
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${s < 10 ? "0" : ""}${s}`;
+}
+
 function doneSatsang(){
   addPending("Satsang Sunna", 4);
 }
@@ -929,10 +1016,17 @@ function doneSatsang(){
 
 
 function openParentReview(){
+ 
+  // 🔔 FIRST TIME PIN REMINDER
+  if(!pin){
+    document.getElementById("pinReminderPopup").style.display = "flex";
+    return;
+  }
   if(pendingTasks.length === 0){
     alert("Koi pending task nahi");
     return;
   }
+ 
 
   const pin = prompt("🔐 Parent PIN dalo");
   if(pin !== getParentPin()){
@@ -974,7 +1068,7 @@ function approveCurrent(){
   reviewIndex++;
   showReviewTask();
 }
-function rejectTask(){
+function rejectCurrent(){
   let users = getUsers();
   users[currentUser].score = Math.max(0, users[currentUser].score - 2);
   saveUsers(users);
@@ -1002,6 +1096,15 @@ function changeParentPin(){
   }
   setParentPin(newPin);
   alert("✅ Parent PIN change ho gaya");
+}
+function closePinReminder(){
+  document.getElementById("pinReminderPopup").style.display = "none";
+}
+
+function openPinSetup(){
+  closePinReminder();
+  document.getElementById("parentPopup").style.display = "none";
+  document.getElementById("changeParentPin").style.display = "flex";
 }
 
 function updateLeaderboard(){
