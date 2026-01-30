@@ -675,7 +675,7 @@ html, body {
 
 </div>
 <!-- 🔐 Parent Review Popup -->
-<div id="reviewOverlay" style="display:none;">
+<div id="parentPopup" style="display:none;">
   <div id="reviewBox">
     <h3>👨‍👩‍👦 Parent Review</h3>
     <p id="reviewText"></p>
@@ -725,9 +725,9 @@ function getUsers(){
   return JSON.parse(localStorage.getItem("users")) || {};
 }
 function saveUsers(users){
-  document.getElementById("entryPopup").style.display = "none";
-
+  localStorage.setItem("users", JSON.stringify(users));
 }
+
 function getParentPin(){
   return localStorage.getItem("parentPin") || DEFAULT_PARENT_PIN;
 }
@@ -844,28 +844,7 @@ function doneSatsang(){
 
 /* ========== PARENT PIN / REVIEW ========== */
 
-function openParentReview(){
-  if(pendingTasks.length === 0){
-    alert("Koi pending task nahi hai");
-    return;
-  }
 
-  const pin = prompt("🔐 Parent PIN dalo");
-  if(pin !== getParentPin()){
-    alert("❌ Galat PIN");
-    return;
-  }
-
-  const popup = document.getElementById("parentPopup");
-  if(!popup){
-    alert("❌ Parent popup HTML missing");
-    return;
-  }
-
-  reviewIndex = 0;
-  popup.style.display = "flex";
-  showReviewTask();
-}
 function openParentReview(){
   if(pendingTasks.length === 0){
     alert("Koi pending task nahi");
@@ -919,12 +898,6 @@ function rejectTask(){
   showReviewTask();
 }
 document.getElementById("parentPopup").style.display = "none";
-
-approveTask()
-  addScore(pendingTasks[reviewIndex].points);
-  reviewIndex++;
-  updateLeaderboard();
-  showReviewTask();
 
 
 
@@ -986,6 +959,16 @@ function updateLeaderboard(){
     .map((u,i)=>`${i+1}. ${u[0]} — ⭐ ${u[1].score}`)
     .join("<br>");
 }
+function skipTask(msgId, nextBtnId){
+  const msg = document.getElementById(msgId);
+  if(msg) msg.innerText = "❌ Skip kiya";
+
+  if(nextBtnId){
+    const btn = document.getElementById(nextBtnId);
+    if(btn) btn.disabled = false;
+  }
+}
+
 
 
 /* ========== INIT ========== */
