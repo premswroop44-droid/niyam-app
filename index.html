@@ -948,7 +948,7 @@ function doneBath(){
   addPending("Nahana", 2);
 }
 
-function donePranayam(){
+function pranBtn(){
   const h = currentHour();
   if(h >= 5){
     alert("❌ Pranayam 5:00 AM se pehle hona chahiye");
@@ -1015,18 +1015,28 @@ function doneSatsang(){
 /* ========== PARENT PIN / REVIEW ========== */
 
 
-function openParentReview(){
- 
-  // 🔔 FIRST TIME PIN REMINDER
-  if(!pin){
-    document.getElementById("pinReminderPopup").style.display = "flex";
+function openParentReview(){{
+  // ✅ pehle pin define
+  const savedPin = localStorage.getItem("parentPIN");
+
+  // 🔔 first-time reminder
+  if(!savedPin){
+    const reminder = document.getElementById("pinReminderPopup");
+    if(reminder){
+      reminder.style.display = "flex";
+    }
     return;
   }
-  if(pendingTasks.length === 0){
-    alert("Koi pending task nahi");
-    return;
+
+  // 🔐 normal parent review
+  const popup = document.getElementById("parentPopup");
+  if(popup){
+    popup.style.display = "flex";
   }
- 
+
+  reviewIndex = 0;
+  showReviewTask();
+}
 
   const pin = prompt("🔐 Parent PIN dalo");
   if(pin !== getParentPin()){
