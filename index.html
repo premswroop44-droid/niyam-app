@@ -456,6 +456,60 @@ body {
     width: 100% !important;
   }
 }
+/* ===== FORCE SCROLL FIX ===== */
+html, body {
+  height: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* cards ke andar bhi scroll allow */
+.card {
+  overflow: visible !important;
+}
+/* overlay click block fix */
+.entry-overlay[style*="display: none"],
+#parentPopup[style*="display: none"] {
+  pointer-events: none;
+}
+.entry-overlay,
+#parentPopup {
+  pointer-events: auto;
+}
+/* ===== Parent section always visible ===== */
+#parentSection,
+.parent-section {
+  display: block !important;
+}
+@media (max-width: 420px) {
+
+  .main-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100%;
+  }
+
+  /* monthly panels sirf button se khulenge */
+  #monthlyReport,
+  #monthSummary {
+    display: none !important;
+  }
+
+  /* buttons normal size */
+  button {
+    width: auto;
+    min-width: 140px;
+    margin: 8px auto;
+  }
+}
+/* ===== FORCE LEADERBOARD SHOW ===== */
+#leaderboard {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative;
+  z-index: 1;
+}
 
 
 </style>
@@ -492,6 +546,10 @@ body {
 <div id="scoreBox" class="card">
   ⭐ Score: 0
 </div>
+<div class="card">
+  <h3>🏆 Leaderboard</h3>
+  <ul id="leaderboard"></ul>
+</div>
 
 <!-- 🔐 Parent Review Button -->
 
@@ -521,7 +579,6 @@ body {
 <button onclick="doneWakeUp()">✔ Tick</button>
 <div class="msg" id="wakeMsg"></div>
 <button class="red" onclick="skipTask('wakeMsg','exStartBtn')">❌ Nahi Kiya</button>
-
 </div>
 
 <!-- 🏃 EXERCISE -->
@@ -613,6 +670,7 @@ body {
   <div id="reviewBox">
     <h3>👨‍👩‍👦 Parent Review</h3>
     <p id="reviewText"></p>
+<button onclick="openParentReview()">🔐 Parent Daily Review</button>
 
     <div class="reviewBtns">
       <button class="yes" onclick="approveCurrent()">✅ Haan</button>
@@ -815,6 +873,14 @@ function rejectTask(){
 }
 document.getElementById("parentPopup").style.display = "none";
 
+approveTask()
+  addScore(pendingTasks[reviewIndex].points);
+  reviewIndex++;
+  updateLeaderboard();
+  showReviewTask();
+
+
+
 
 /* ========== CHANGE PARENT PIN ========== */
 function changeParentPin(){
@@ -832,21 +898,39 @@ function changeParentPin(){
   alert("✅ Parent PIN change ho gaya");
 }
 
-/* ========== LEADERBOARD ========== */
 function updateLeaderboard(){
-  let users = getUsers();
+  const lb = document.getElementById("leaderboard");
+  if(!lb){
+    console.warn("Leaderboard element missing");
+    return;
+  }
+
+  let users = JSON.parse(localStorage.getItem("users")) || {};
+
   let arr = Object.entries(users)
     .sort((a,b)=>b[1].score - a[1].score);
+
+  if(arr.length === 0){
+    lb.innerHTML = "<li>No data yet</li>";
+    return;
+  }
 
   let html = "";
   arr.forEach((u,i)=>{
     html += `<li>${i+1}. ${u[0]} — ⭐ ${u[1].score}</li>`;
   });
-  document.getElementById("leaderboard").innerHTML = html;
+
+  lb.innerHTML = html;
 }
+
 
 /* ========== INIT ========== */
 window.onload = loadUser;
+window.onload = () => {
+  loadUser();
+  updateLeaderboard();
+};
+
 </script>
 </body>
 </html>
