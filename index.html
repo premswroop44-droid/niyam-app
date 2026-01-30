@@ -542,6 +542,42 @@ html, body {
 html, body {
   overflow-y: auto !important;
 }
+/* ===== PARENT REVIEW POPUP – MOBILE FIX ===== */
+
+#parentPopup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.55);
+  display: none;              /* JS se control */
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* actual popup card */
+#parentPopup > div {
+  background: #fff;
+  width: 92%;
+  max-width: 420px;
+  max-height: 85vh;
+  margin: 0 auto;             /* 🔥 center fix */
+  padding: 18px;
+  border-radius: 16px;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+  overflow-y: auto;           /* scroll inside popup */
+}
+
+/* buttons inside popup */
+#parentPopup button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 15px;
+}
 
 
 </style>
@@ -684,6 +720,8 @@ html, body {
 <button onclick="openParentReview()">🔐 Parent Daily Review</button>
 
     <div class="reviewBtns">
+      <p id="reviewTaskText" style="margin:10px 0;font-weight:600"></p>
+
       <button class="yes" onclick="approveCurrent()">✅ Haan</button>
       <button class="no" onclick="rejectCurrent()">❌ Nahi</button>
     </div>
@@ -927,12 +965,15 @@ function showReviewTask(){
     t.name + " (" + t.time + ")";
 }
 
-function approveTask(){
-  addScore(pendingTasks[reviewIndex].points);
+function approveCurrent(){
+  if(reviewIndex >= pendingTasks.length) return;
+
+  const task = pendingTasks[reviewIndex];
+  addScore(task.points);
+
   reviewIndex++;
   showReviewTask();
 }
-
 function rejectTask(){
   let users = getUsers();
   users[currentUser].score = Math.max(0, users[currentUser].score - 2);
