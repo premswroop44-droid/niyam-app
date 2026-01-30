@@ -410,13 +410,6 @@ body {
 /* ========= FORCE MOBILE HIDE (≤ 400px) ========= */
 @media (max-width: 400px){
 
-  /* Monthly Report + Month Summary panels */
-  #monthlyReport,
-  #monthSummary,
-  .monthly-report,
-  .month-summary {
-    display: none !important;
-  }
 
 }
 @media (max-width: 400px){
@@ -439,16 +432,7 @@ body {
     overflow-x: hidden;
   }
 
-  /* FORCE remove monthly & summary */
-  #monthlyReport,
-  #monthSummary,
-  .monthly-report,
-  .month-summary {
-    display: none !important;
-    width: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
+  
 
   /* Layout collapse to single column */
   .main-layout {
@@ -489,11 +473,6 @@ html, body {
     width: 100%;
   }
 
-  /* monthly panels sirf button se khulenge */
-  #monthlyReport,
-  #monthSummary {
-    display: none !important;
-  }
 
   /* buttons normal size */
   button {
@@ -509,6 +488,10 @@ html, body {
   opacity: 1 !important;
   position: relative;
   z-index: 1;
+}
+html, body {
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 
@@ -662,8 +645,6 @@ html, body {
 </div>
 
 
-
-
 </div>
 <!-- 🔐 Parent Review Popup -->
 <div id="reviewOverlay" style="display:none;">
@@ -678,16 +659,7 @@ html, body {
     </div>
   </div>
 </div>
-<!-- 📅 Monthly Report -->
-<div class="card">
-  <div class="title">📊 Monthly Report</div>
-  <div id="calendar"></div>
-</div>
-<div class="card">
-  <div class="title">🧾 Month Summary</div>
-  <div class="time">
-    🪙 Total Coins: <strong id="monthCoins">0</strong><br>
-    💰 Rupees: ₹ <strong id="monthRupees">0</strong>
+
   
 <script>
   /*************************************************
