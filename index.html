@@ -548,18 +548,19 @@ html, body {
 </head>
 
 <body>
-  <div id="entryPopup" class="entry-overlay">
-
-  <div class="entry-popup">
+ <div id="entryPopup" class="popup-overlay" style="display:flex">
+  <div class="popup-card">
     <h2>👋 Welcome</h2>
     <p>Apni basic details bhare</p>
 
-    <input id="userNameInput" type="text" placeholder="Full Name">
-    <input id="userAgeInput" type="number" placeholder="Age">
-    <input id="userPhoneInput" type="tel" placeholder="Phone Number">
+    <input id="userNameInput" placeholder="Full Name">
+    <input id="userAgeInput" placeholder="Age">
+    <input id="userPhoneInput" placeholder="Phone Number">
 
     <button onclick="saveUserName()">Continue</button>
   </div>
+</div>
+
   <div id="entryPopup" class="entry-overlay" style="display:none">
 
 
@@ -734,23 +735,38 @@ function setParentPin(pin){
 
 /* ========== USER SETUP ========== */
 function saveUserName(){
-  const name = document.getElementById("userNameInput").value.trim();
-  if(!name){ alert("Naam likhiye"); return; }
+  const name = document.getElementById("userNameInput")?.value?.trim();
+  const age = document.getElementById("userAgeInput")?.value?.trim();
+  const phone = document.getElementById("userPhoneInput")?.value?.trim();
+
+  if(!name || !age || !phone){
+    alert("Please fill all details");
+    return;
+  }
 
   currentUser = name;
   localStorage.setItem("activeUser", name);
 
-  let users = getUsers();
-  if(!users[name]) users[name] = { score: 0 };
-  saveUsers(users);
+  let users = JSON.parse(localStorage.getItem("users")) || {};
+  if(!users[name]){
+    users[name] = { score: 0, age, phone };
+    localStorage.setItem("users", JSON.stringify(users));
+  }
 
-  document.getElementById("nameScreen").style.display = "none";
-  document.getElementById("welcomeUser").innerText = "👋 Namaste, " + name;
-document.getElementById("entryPopup").style.display = "none";
+  const popup = document.getElementById("entryPopup");
+  if(popup){
+    popup.style.display = "none";
+  }
+
+  const welcome = document.getElementById("welcomeUser");
+  if(welcome){
+    welcome.innerText = "👋 Namaste, " + name;
+  }
 
   updateScoreUI();
   updateLeaderboard();
 }
+
 
 function loadUser(){
   const saved = localStorage.getItem("activeUser");
