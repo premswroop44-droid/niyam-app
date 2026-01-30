@@ -673,6 +673,8 @@ html, body {
 </div>
 
 
+
+
 </div>
 <!-- 🔐 Parent Review Popup -->
 <div id="parentPopup" style="display:none;">
@@ -768,6 +770,10 @@ function saveUserName(){
   updateScoreUI();
   updateLeaderboard();
 }
+function currentHour(){
+  return new Date().getHours();
+}
+
 
 function loadUser(){
   try {
@@ -831,11 +837,50 @@ function addPending(taskName, points){
 }
 
 /* ========== TASK FUNCTIONS ========== */
-function doneWakeUp(){ addPending("Subah Jaldi Uthna", 5); }
-function doneExercise(){ addPending("Exercise", 3); }
-function doneBath(){ addPending("Nahana", 2); }
-function donePranayam(){ addPending("Pranayam", 4); }
-function doneMala(){ addPending("11 Mala Jap", 5); }
+function doneWakeUp(){
+  const h = currentHour();
+  if(h < 4 || h >= 5){
+    alert("❌ Subah uthna sirf 4:00 – 5:00 AM ke beech valid hai");
+    return;
+  }
+  addPending("Subah Jaldi Uthna", 5);
+}
+
+function doneExercise(){
+  const h = currentHour();
+  if(h >= 6){
+    alert("❌ Exercise 6:00 AM se pehle honi chahiye");
+    return;
+  }
+  addPending("Exercise", 3);
+}
+
+function doneBath(){
+  const h = currentHour();
+  if(h >= 6){
+    alert("❌ Nahana 6:00 AM se pehle hona chahiye");
+    return;
+  }
+  addPending("Nahana", 2);
+}
+
+function donePranayam(){
+  const h = currentHour();
+  if(h >= 5){
+    alert("❌ Pranayam 5:00 AM se pehle hona chahiye");
+    return;
+  }
+  addPending("Pranayam", 4);
+}
+function doneMala(){
+  const h = currentHour();
+  if(h >= 7){
+    alert("❌ Mala jap 7:00 AM se pehle hona chahiye");
+    return;
+  }
+  addPending("11 Mala Jap", 5);
+}
+
 function doneMoun(){ addPending("Moun (Chup Rahna)", 3); } // no repeat popup
 function doneSatsang(){
   addPending("Satsang Sunna", 4);
@@ -967,6 +1012,9 @@ function skipTask(msgId, nextBtnId){
     const btn = document.getElementById(nextBtnId);
     if(btn) btn.disabled = false;
   }
+}
+function parentReview(){
+  openParentReview();
 }
 
 

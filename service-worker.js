@@ -1,4 +1,4 @@
-const CACHE_NAME = "niyam-app-v30";
+const CACHE_NAME = "niyam-app-v31";
 
 const FILES_TO_CACHE = [
   "./",
