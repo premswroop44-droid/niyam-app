@@ -1207,19 +1207,37 @@ function setParentPIN(pin){
 function getParentPIN(){
   return localStorage.getItem("parentPIN");
 }
+ 
 
+function parentReview(){
+  openParentReview();
+}
 
 function openParentReview(){
 
-  // first-time PIN reminder
   const savedPin = localStorage.getItem("parentPIN");
+
+  // first time reminder
   if(!savedPin){
-    const reminder = document.getElementById("pinReminderPopup");
-    if(reminder){
-      reminder.style.display = "flex";
-    }
+    document.getElementById("pinReminderPopup").style.display = "flex";
     return;
   }
+
+  const entered = prompt("🔐 Parent PIN dalo");
+  if(entered !== savedPin){
+    alert("❌ Galat PIN");
+    return;
+  }
+
+  if(pendingTasks.length === 0){
+    alert("Aaj koi pending task nahi hai");
+    return;
+  }
+
+  reviewIndex = 0;
+  document.getElementById("parentPopup").style.display = "flex";
+  showReviewTask();
+}
 
   // PIN verify
   const entered = prompt("🔐 Parent PIN dalo");
@@ -1243,7 +1261,7 @@ function openParentReview(){
   reviewIndex = 0;
   popup.style.display = "flex";
   showReviewTask();
-}
+
 
 function verifyParentPIN(){
   const enteredPin = prompt("🔐 Parent PIN dalo");
@@ -1350,9 +1368,10 @@ function showReviewTask(){
     alert("✅ Parent review complete");
     return;
   }
+
   const t = pendingTasks[reviewIndex];
-document.getElementById("reviewTaskText").innerText =
-    t.name + " (" + t.time + ")";
+  document.getElementById("reviewTaskText").innerText =
+    `${t.name} (${t.time})`;
 }
 
 function approveCurrent(){
@@ -1363,32 +1382,28 @@ function approveCurrent(){
 }
 
 function rejectCurrent(){
-  const naam = currentUserName;
 
-  score = score - 2;
-  if(score < 0) score = 0;
+  const name =
+    localStorage.getItem("userName") || "Bachcha";
 
-  saveScore();
+  // ❌ 2 score penalty
+  let users = getUsers();
+  if(!users[currentUser]) users[currentUser] = { score: 0 };
+
+  users[currentUser].score -= 2;
+  if(users[currentUser].score < 0)
+    users[currentUser].score = 0;
+
+  saveUsers(users);
   updateScoreUI();
 
-  alert(`😠 ${naam} aapne jhooth bola!\n❌ 2 score minus honge`);
+  alert(`😠 ${name} aapne jhooth bola!\n❌ 2 score minus honge`);
 
-  closeParentPopup(); // parent review popup band
+  reviewIndex++;
+  showReviewTask();
 }
 
 let reviewManuallyOpened = false;
-
-function parentReview(){
-  reviewManuallyOpened = true;
-  openParentReview();
-}
-
-function openParentReview(){
-  if(!reviewManuallyOpened) return;
-
-  // rest of your existing logic
-}
-
 
 
 /* ========== CHANGE PARENT PIN ========== */
