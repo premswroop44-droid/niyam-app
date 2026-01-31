@@ -617,6 +617,47 @@ html, body {
   border-radius: 10px;
   font-size: 15px;
 }
+/* Parent Review Popup */
+#parentPopup{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.parent-review-card{
+  background: #fff;
+  width: 90%;
+  max-width: 420px;
+  border-radius: 18px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,.3);
+}
+
+.parent-review-card h2{
+  margin-bottom: 12px;
+}
+
+.review-task{
+  font-size: 16px;
+  margin: 16px 0;
+}
+
+.review-actions{
+  display: flex;
+  gap: 12px;
+}
+
+.review-actions button{
+  flex: 1;
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 10px;
+}
 
 
 </style>
@@ -979,15 +1020,13 @@ function stopExercise(){
 function updateExerciseUI(){
   const timerEl = document.getElementById("exerciseTimer");
 
-  // 🛡️ SAFETY CHECK
+  // ⛔ Parent Review open hai ya DOM me nahi hai
   if(!timerEl){
-    console.warn("exerciseTimer element missing");
-    return;
+    return; // silently exit — no error
   }
 
   const m = Math.floor(exSeconds / 60);
   const s = exSeconds % 60;
-
   timerEl.innerText = `${m}:${s < 10 ? "0" : ""}${s}`;
 }
 
@@ -1250,7 +1289,7 @@ function rejectCurrent(){
   users[currentUser].score = Math.max(0, users[currentUser].score - 2);
   saveUsers(users);
   updateScoreUI();
-
+  
   reviewIndex++;
   showReviewTask();
 }
