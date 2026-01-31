@@ -984,15 +984,17 @@ function updateExerciseUI(){
 }
 
 function exerciseDone(){
-  addPending("Exercise (30 min)", 3);
-  alert("✅ Exercise mark ho gayi");
-}
- const h = currentHour();
+
+  const h = currentHour();
   if(h >= 6){
     alert("❌ Exercise 6:00 AM se pehle honi chahiye");
     return;
   }
+
   addPending("Exercise", 3);
+  alert("✅ Exercise mark ho gayi");
+}
+
   
 function skipExercise(){
   alert("❌ Exercise skip");
