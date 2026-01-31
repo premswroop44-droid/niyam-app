@@ -1038,11 +1038,21 @@ function openParentReview(){{
   showReviewTask();
 }
 
-  const pin = prompt("🔐 Parent PIN dalo");
-  if(pin !== getParentPin()){
-    alert("❌ Galat PIN");
-    return;
+function verifyParentPIN(){
+  const enteredPin = prompt("🔐 Parent PIN dalo");
+
+  if(!enteredPin){
+    alert("PIN cancel kar diya");
+    return false;
   }
+
+  if(enteredPin !== getParentPin()){
+    alert("❌ Galat PIN");
+    return false;
+  }
+
+  return true;
+}
 
   reviewIndex = 0;
   const p = document.getElementById("parentPopup");
@@ -1167,9 +1177,7 @@ function skipTask(msgId, nextBtnId){
     if(btn) btn.disabled = false;
   }
 }
-function parentReview(){
-  openParentReview();
-}
+
 
 
 
