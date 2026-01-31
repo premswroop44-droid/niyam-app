@@ -977,10 +977,18 @@ function stopExercise(){
 }
 
 function updateExerciseUI(){
+  const timerEl = document.getElementById("exerciseTimer");
+
+  // 🛡️ SAFETY CHECK
+  if(!timerEl){
+    console.warn("exerciseTimer element missing");
+    return;
+  }
+
   const m = Math.floor(exSeconds / 60);
   const s = exSeconds % 60;
-  document.getElementById("exerciseTimer").innerText =
-    `${m}:${s < 10 ? "0" : ""}${s}`;
+
+  timerEl.innerText = `${m}:${s < 10 ? "0" : ""}${s}`;
 }
 
 function exerciseDone(){
@@ -1075,6 +1083,13 @@ function doneSatsang(){
 
 
 /* ========== PARENT PIN / REVIEW ========== */
+function setParentPIN(pin){
+  localStorage.setItem("parentPIN", pin);
+}
+
+function getParentPIN(){
+  return localStorage.getItem("parentPIN");
+}
 
 
 function openParentReview(){
