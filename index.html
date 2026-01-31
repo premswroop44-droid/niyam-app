@@ -948,7 +948,7 @@ function doneBath(){
   addPending("Nahana", 2);
 }
 
-function pranBtn(){
+function donePran(){
   const h = currentHour();
   if(h >= 5){
     alert("❌ Pranayam 5:00 AM se pehle hona chahiye");
@@ -1015,11 +1015,10 @@ function doneSatsang(){
 /* ========== PARENT PIN / REVIEW ========== */
 
 
-function openParentReview(){{
-  // ✅ pehle pin define
-  const savedPin = localStorage.getItem("parentPIN");
+function openParentReview(){
 
-  // 🔔 first-time reminder
+  // first-time PIN reminder
+  const savedPin = localStorage.getItem("parentPIN");
   if(!savedPin){
     const reminder = document.getElementById("pinReminderPopup");
     if(reminder){
@@ -1028,13 +1027,27 @@ function openParentReview(){{
     return;
   }
 
-  // 🔐 normal parent review
+  // PIN verify
+  const entered = prompt("🔐 Parent PIN dalo");
+  if(entered !== savedPin){
+    alert("❌ Galat PIN");
+    return;
+  }
+
+  // open review popup
   const popup = document.getElementById("parentPopup");
-  if(popup){
-    popup.style.display = "flex";
+  if(!popup){
+    alert("Parent popup missing");
+    return;
+  }
+
+  if(pendingTasks.length === 0){
+    alert("Aaj koi pending task nahi hai");
+    return;
   }
 
   reviewIndex = 0;
+  popup.style.display = "flex";
   showReviewTask();
 }
 
@@ -1068,15 +1081,23 @@ function closePinSetup(){
 
 function saveParentPin(){
   const input = document.getElementById("newParentPin");
+
   if(!input || !input.value){
-    alert("PIN enter kare");
+    alert("⚠️ Kripya PIN enter kare");
     return;
   }
 
+  // ✅ YAHI PE PIN SAVE HOTA HAI
   localStorage.setItem("parentPIN", input.value);
+
   alert("✅ Parent PIN save ho gaya");
 
-  closePinSetup();
+  input.value = "";
+
+  const pinPopup = document.getElementById("changePinPopup");
+  if(pinPopup){
+    pinPopup.style.display = "none";
+  }
 }
 
 
@@ -1089,7 +1110,7 @@ function saveParentPin(){
 
   p.style.display = "flex";
   showReviewTask();
-}
+
 
 
 function showReviewTask(){
@@ -1101,30 +1122,26 @@ function showReviewTask(){
     return;
   }
   const t = pendingTasks[reviewIndex];
-  document.getElementById("parentTaskName").innerText =
+document.getElementById("reviewTaskText").innerText =
     t.name + " (" + t.time + ")";
 }
 
 function approveCurrent(){
-  if(reviewIndex >= pendingTasks.length) return;
-
   const task = pendingTasks[reviewIndex];
   addScore(task.points);
-
   reviewIndex++;
   showReviewTask();
 }
+
 function rejectCurrent(){
   let users = getUsers();
   users[currentUser].score = Math.max(0, users[currentUser].score - 2);
   saveUsers(users);
   updateScoreUI();
-  alert("❌ apne Jhoot bola – 2 score minus");
+
   reviewIndex++;
   showReviewTask();
 }
-document.getElementById("parentPopup").style.display = "none";
-
 
 
 
