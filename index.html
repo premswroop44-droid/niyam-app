@@ -789,6 +789,25 @@ html, body {
   </div>
 </div>
 
+<!-- 🔐 PARENT PIN SETUP -->
+<div id="changePinPopup" style="display:none;">
+  <div class="pin-reminder-card">
+    <h2>🔐 Parent PIN Set Kare</h2>
+    <p>Kripya 4 digit ka PIN dale</p>
+
+    <input
+      type="password"
+      id="newParentPin"
+      placeholder="Enter Parent PIN"
+      maxlength="4"
+      style="width:100%;padding:10px;font-size:16px;"
+    />
+
+    <button onclick="saveParentPin()">✅ Save PIN</button>
+    <button onclick="closePinSetup()">❌ Cancel</button>
+  </div>
+</div>
+
 <script>
   /*************************************************
  * NIYAM APP – FULL FINAL JS
@@ -934,15 +953,52 @@ function doneWakeUp(){
   addPending("Subah Jaldi Uthna", 5);
 }
 
-function doneExercise(){
-  const h = currentHour();
+let exSeconds = 30 * 60; // 30 minutes
+let exInterval = null;
+
+function startExercise(){
+  if(exInterval) return;
+
+  exInterval = setInterval(()=>{
+    exSeconds--;
+    updateExerciseUI();
+
+    if(exSeconds <= 0){
+      clearInterval(exInterval);
+      exInterval = null;
+      alert("🏃‍♂️ Exercise poori ho gayi");
+    }
+  },1000);
+}
+
+function stopExercise(){
+  clearInterval(exInterval);
+  exInterval = null;
+}
+
+function updateExerciseUI(){
+  const m = Math.floor(exSeconds / 60);
+  const s = exSeconds % 60;
+  document.getElementById("exerciseTimer").innerText =
+    `${m}:${s < 10 ? "0" : ""}${s}`;
+}
+
+function exerciseDone(){
+  addPending("Exercise (30 min)", 3);
+  alert("✅ Exercise mark ho gayi");
+}
+ const h = currentHour();
   if(h >= 6){
     alert("❌ Exercise 6:00 AM se pehle honi chahiye");
     return;
   }
   addPending("Exercise", 3);
+  
+function skipExercise(){
+  alert("❌ Exercise skip");
 }
 
+ 
 function doneBath(){
   const h = currentHour();
   if(h >= 6){
@@ -1102,6 +1158,42 @@ function saveParentPin(){
   if(pinPopup){
     pinPopup.style.display = "none";
   }
+}
+function openPinSetup(){
+  closePinReminder();
+  const pinPopup = document.getElementById("changePinPopup");
+  if(pinPopup){
+    pinPopup.style.display = "flex";
+  }
+}
+
+function closePinSetup(){
+  const pinPopup = document.getElementById("changePinPopup");
+  if(pinPopup){
+    pinPopup.style.display = "none";
+  }
+}
+
+function closePinReminder(){
+  const reminder = document.getElementById("pinReminderPopup");
+  if(reminder){
+    reminder.style.display = "none";
+  }
+}
+
+function saveParentPin(){
+  const input = document.getElementById("newParentPin");
+
+  if(!input || input.value.length < 4){
+    alert("⚠️ Kripya 4 digit PIN dale");
+    return;
+  }
+
+  localStorage.setItem("parentPIN", input.value);
+  alert("✅ Parent PIN save ho gaya");
+
+  input.value = "";
+  closePinSetup();
 }
 
 
