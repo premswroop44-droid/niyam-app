@@ -781,7 +781,7 @@ html, body {
   <!-- 🔔 FIRST TIME PARENT PIN REMINDER -->
 <div id="pinReminderPopup" style="display:none;">
   <div class="pin-reminder-card">
-    <h2>🙏 Yaad Dilana</h2>
+    <h2>🙏 karipya apna ek pin banaye</h2>
     <p>
       Kripya <b>Mata ya Pita</b> apna  
       <b>Parent PIN</b> banaye  
@@ -1053,6 +1053,32 @@ function verifyParentPIN(){
 
   return true;
 }
+function openPinSetup(){
+  const reminder = document.getElementById("pinReminderPopup");
+  const pinPopup = document.getElementById("changePinPopup");
+
+  if(reminder) reminder.style.display = "none";
+  if(pinPopup) pinPopup.style.display = "flex";
+}
+
+function closePinSetup(){
+  const pinPopup = document.getElementById("changePinPopup");
+  if(pinPopup) pinPopup.style.display = "none";
+}
+
+function saveParentPin(){
+  const input = document.getElementById("newParentPin");
+  if(!input || !input.value){
+    alert("PIN enter kare");
+    return;
+  }
+
+  localStorage.setItem("parentPIN", input.value);
+  alert("✅ Parent PIN save ho gaya");
+
+  closePinSetup();
+}
+
 
   reviewIndex = 0;
   const p = document.getElementById("parentPopup");
@@ -1176,6 +1202,9 @@ function skipTask(msgId, nextBtnId){
     const btn = document.getElementById(nextBtnId);
     if(btn) btn.disabled = false;
   }
+}
+function parentReview(){
+  openParentReview();
 }
 
 
