@@ -658,6 +658,73 @@ html, body {
   font-size: 15px;
   border-radius: 10px;
 }
+/* ===== COMMON POPUP OVERLAY ===== */
+.popup-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+/* ===== PARENT REVIEW CARD ===== */
+.parent-review-card{
+  background: #fff;
+  width: 92%;
+  max-width: 420px;
+  border-radius: 18px;
+  padding: 18px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,.35);
+}
+
+/* title */
+.parent-review-card h2{
+  margin-bottom: 14px;
+}
+
+/* task text */
+.review-task{
+  font-size: 16px;
+  margin: 16px 0 22px;
+  line-height: 1.4;
+}
+
+/* buttons row */
+.review-actions{
+  display: flex;
+  gap: 12px;
+}
+
+/* buttons */
+.review-actions button{
+  flex: 1;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: none;
+}
+
+/* colors */
+.btn-yes{
+  background: #16a34a;
+  color: #fff;
+}
+
+.btn-no{
+  background: #dc2626;
+  color: #fff;
+}
+
+/* 📱 MOBILE SAFETY */
+@media (max-width: 420px){
+  .parent-review-card{
+    width: 94%;
+    padding: 16px;
+  }
+}
 
 
 </style>
