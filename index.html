@@ -759,7 +759,7 @@ html, body {
     </div>
   </div>
 </div>
- <div id="entryPopup" class="popup-overlay" style="display:flex">
+  <div id="entryPopup" class="entry-overlay" style="display:none">
   <div class="popup-card">
     <h2>👋 Welcome</h2>
     <p>Apni basic details bhare</p>
@@ -771,12 +771,8 @@ html, body {
     <button onclick="saveUserName()">Continue</button>
   </div>
 </div>
-
-  <div id="entryPopup" class="entry-overlay" style="display:none">
-
-
-<h2 id="welcomeUser" style="display:none"></h2>
 </div>
+
 </div>
   <!-- 🔔 FIRST TIME PARENT PIN REMINDER -->
 <div id="pinReminderPopup" style="display:none;">
@@ -823,37 +819,45 @@ function setParentPin(pin){
 
 /* ========== USER SETUP ========== */
 function saveUserName(){
-  const name = document.getElementById("userNameInput")?.value?.trim();
-  const age = document.getElementById("userAgeInput")?.value?.trim();
-  const phone = document.getElementById("userPhoneInput")?.value?.trim();
+  const nameInput = document.getElementById("userNameInput");
+  const ageInput = document.getElementById("userAgeInput");
+  const phoneInput = document.getElementById("userPhoneInput");
 
-  if(!name || !age || !phone){
-    alert("Please fill all details");
+  if(!nameInput || !ageInput || !phoneInput){
+    alert("❌ Input fields missing");
     return;
   }
 
-  currentUser = name;
-  localStorage.setItem("activeUser", name);
-
-  let users = JSON.parse(localStorage.getItem("users")) || {};
-  if(!users[name]){
-    users[name] = { score: 0, age, phone };
-    localStorage.setItem("users", JSON.stringify(users));
+  if(
+    nameInput.value.trim() === "" ||
+    ageInput.value.trim() === "" ||
+    phoneInput.value.trim() === ""
+  ){
+    alert("⚠️ Kripya sab details bhare");
+    return;
   }
 
-  const popup = document.getElementById("entryPopup");
-  if(popup){
-    popup.style.display = "none";
+  // ✅ SAVE USER DATA
+  localStorage.setItem("userName", nameInput.value.trim());
+  localStorage.setItem("userAge", ageInput.value.trim());
+  localStorage.setItem("userPhone", phoneInput.value.trim());
+
+  // ✅ HIDE ENTRY POPUP
+  const entryPopup = document.getElementById("entryPopup");
+  if(entryPopup){
+    entryPopup.style.display = "none";
   }
 
+  // ✅ SHOW WELCOME TEXT
   const welcome = document.getElementById("welcomeUser");
   if(welcome){
-    welcome.innerText = "👋 Namaste, " + name;
+    welcome.innerText = "👋 Namaste, " + nameInput.value.trim();
+    welcome.style.display = "block";
   }
 
-  updateScoreUI();
-  updateLeaderboard();
+  console.log("✅ User data saved successfully");
 }
+
 function currentHour(){
   return new Date().getHours();
 }
@@ -1105,7 +1109,7 @@ function saveParentPin(){
   const p = document.getElementById("parentPopup");
   if(!p){
     alert("Parent popup missing");
-    return;
+    return false;
   }
 
   p.style.display = "flex";
