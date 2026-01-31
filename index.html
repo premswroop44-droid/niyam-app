@@ -1168,10 +1168,23 @@ function closePinReminder(){
 }
 
 function openPinSetup(){
-  closePinReminder();
-  document.getElementById("parentPopup").style.display = "none";
-  document.getElementById("changeParentPin").style.display = "flex";
+  // close reminder safely
+  const reminder = document.getElementById("pinReminderPopup");
+  if(reminder) reminder.style.display = "none";
+
+  // close parent review popup if open
+  const parentPopup = document.getElementById("parentPopup");
+  if(parentPopup) parentPopup.style.display = "none";
+
+  // open PIN setup popup (✅ correct ID)
+  const pinPopup = document.getElementById("changePinPopup");
+  if(pinPopup){
+    pinPopup.style.display = "flex";
+  }else{
+    alert("❌ PIN setup popup missing");
+  }
 }
+
 
 function updateLeaderboard(){
   const lb = document.getElementById("leaderboard");
