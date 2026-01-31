@@ -669,27 +669,41 @@ html, body {
   z-index: 10000;
 }
 
-/* ===== PARENT REVIEW CARD ===== */
+/* ===== POPUP OVERLAY ===== */
+.popup-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+/* ===== POPUP CARD ===== */
 .parent-review-card{
   background: #fff;
-  width: 92%;
+  width: 90%;
   max-width: 420px;
+  max-height: 80vh;          /* 🔑 MOST IMPORTANT */
   border-radius: 18px;
   padding: 18px;
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0,0,0,.35);
+  box-shadow: 0 25px 50px rgba(0,0,0,.35);
+  overflow: hidden;          /* 🔑 NO SCROLL INSIDE */
 }
 
 /* title */
 .parent-review-card h2{
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 /* task text */
 .review-task{
   font-size: 16px;
-  margin: 16px 0 22px;
+  margin: 14px 0 22px;
   line-height: 1.4;
+  word-wrap: break-word;
 }
 
 /* buttons row */
@@ -707,7 +721,6 @@ html, body {
   border: none;
 }
 
-/* colors */
 .btn-yes{
   background: #16a34a;
   color: #fff;
@@ -716,14 +729,6 @@ html, body {
 .btn-no{
   background: #dc2626;
   color: #fff;
-}
-
-/* 📱 MOBILE SAFETY */
-@media (max-width: 420px){
-  .parent-review-card{
-    width: 94%;
-    padding: 16px;
-  }
 }
 
 
@@ -852,21 +857,22 @@ html, body {
 
 
 </div>
-<!-- 🔐 Parent Review Popup -->
-<div id="parentPopup" style="display:none;">
-  <div id="reviewBox">
-    <h3>👨‍👩‍👦 Parent Review</h3>
-    <p id="reviewText"></p>
-<button onclick="openParentReview()">🔐 Parent Daily Review</button>
+<!-- 👨‍👩‍👧 Parent Review Popup -->
+<div id="parentPopup" class="popup-overlay" style="display:none;">
+  <div class="parent-review-card">
 
-    <div class="reviewBtns">
-      <p id="reviewTaskText" style="margin:10px 0;font-weight:600"></p>
+    <h2>👨‍👩‍👧 Parent Review</h2>
 
-      <button class="yes" onclick="approveCurrent()">✅ Haan</button>
-      <button class="no" onclick="rejectCurrent()">❌ Nahi</button>
+    <div id="reviewTaskText" class="review-task"></div>
+
+    <div class="review-actions">
+      <button class="btn-yes" onclick="approveCurrent()">✔ Haan</button>
+      <button class="btn-no" onclick="rejectCurrent()">❌ Nahi</button>
     </div>
+
   </div>
 </div>
+
   <div id="entryPopup" class="entry-overlay" style="display:none">
   <div class="popup-card">
     <h2>👋 Welcome</h2>
@@ -954,6 +960,10 @@ function saveUserName(){
     alert("❌ Input fields missing");
     return;
   }
+  localStorage.setItem("userName", name);
+currentUserName = name;
+
+let currentUserName = localStorage.getItem("userName") || "Bachcha";
 
   if(
     nameInput.value.trim() === "" ||
@@ -1021,6 +1031,7 @@ function loadUser(){
     alert("App load error – console check karo");
   }
 }
+
 
 
 /* ========== SCORE SYSTEM (ONE SOURCE) ========== */
@@ -1352,13 +1363,30 @@ function approveCurrent(){
 }
 
 function rejectCurrent(){
-  let users = getUsers();
-  users[currentUser].score = Math.max(0, users[currentUser].score - 2);
-  saveUsers(users);
+  const naam = currentUserName;
+
+  score = score - 2;
+  if(score < 0) score = 0;
+
+  saveScore();
   updateScoreUI();
-  
-  reviewIndex++;
-  showReviewTask();
+
+  alert(`😠 ${naam} aapne jhooth bola!\n❌ 2 score minus honge`);
+
+  closeParentPopup(); // parent review popup band
+}
+
+let reviewManuallyOpened = false;
+
+function parentReview(){
+  reviewManuallyOpened = true;
+  openParentReview();
+}
+
+function openParentReview(){
+  if(!reviewManuallyOpened) return;
+
+  // rest of your existing logic
 }
 
 
